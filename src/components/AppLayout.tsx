@@ -13,12 +13,12 @@ interface AppLayoutProps {
 }
 
 const navItems = [
-  { path: '/home', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/play', icon: Crosshair, label: 'Play' },
-  { path: '/explore', icon: Compass, label: 'Explore' },
-  { path: '/revision', icon: BookMarked, label: 'Revision' },
-  { path: '/pricing', icon: Crown, label: 'Plans' },
-  { path: '/profile', icon: User, label: 'Profile' },
+  { path: '/home', icon: LayoutDashboard, label: 'Dashboard', emoji: '📊' },
+  { path: '/play', icon: Crosshair, label: 'Play', emoji: '🔥' },
+  { path: '/explore', icon: Compass, label: 'Explore', emoji: '🧭' },
+  { path: '/revision', icon: BookMarked, label: 'Revision', emoji: '📚' },
+  { path: '/pricing', icon: Crown, label: 'Plans', emoji: '👑' },
+  { path: '/profile', icon: User, label: 'Profile', emoji: '👤' },
 ];
 
 const AppLayout = ({ children, streakTimer }: AppLayoutProps) => {
@@ -30,26 +30,28 @@ const AppLayout = ({ children, streakTimer }: AppLayoutProps) => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-card/95 backdrop-blur border-b border-border">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3">
+      <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-xl border-b border-border/60">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
           {/* Logo */}
-          <button onClick={() => navigate('/home')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="text-2xl">🎯</span>
-            <h1 className="text-2xl font-display text-primary">EduBlast</h1>
+          <button onClick={() => navigate('/home')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity group">
+            <span className="text-2xl group-hover:scale-110 transition-transform">🎯</span>
+            <h1 className="text-2xl font-display bg-clip-text text-transparent" style={{ background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              EduBlast
+            </h1>
           </button>
 
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Nav Links - Desktop */}
+          <nav className="hidden md:flex items-center gap-0.5 bg-muted/50 rounded-2xl p-1">
             {navItems.map(({ path, icon: Icon, label }) => {
               const isActive = location.pathname === path;
               return (
                 <button
                   key={path}
                   onClick={() => navigate(path)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                     isActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'bg-card text-primary shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -69,37 +71,40 @@ const AppLayout = ({ children, streakTimer }: AppLayoutProps) => {
               />
             )}
             {user && (
-              <div className="flex items-center gap-1.5 bg-edu-yellow/20 px-3 py-1.5 rounded-full">
+              <button
+                onClick={() => navigate('/pricing')}
+                className="flex items-center gap-1.5 bg-edu-yellow/15 hover:bg-edu-yellow/25 px-3.5 py-2 rounded-full transition-colors"
+              >
                 <Coins className="w-4 h-4 text-edu-orange" />
-                <span className="font-bold text-sm text-foreground">{user.rdm}</span>
-                <span className="text-xs text-muted-foreground hidden sm:inline">RDM</span>
-              </div>
+                <span className="font-extrabold text-sm text-foreground">{user.rdm}</span>
+                <span className="text-xs text-muted-foreground hidden sm:inline font-bold">RDM</span>
+              </button>
             )}
             <button
               onClick={() => navigate('/profile')}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="w-9 h-9 rounded-xl bg-muted/60 hover:bg-muted flex items-center justify-center transition-colors"
             >
-              <Settings className="w-5 h-5 text-muted-foreground" />
+              <Settings className="w-4.5 h-4.5 text-muted-foreground" />
             </button>
           </div>
         </div>
 
-        {/* Mobile nav - horizontal scroll */}
-        <div className="md:hidden border-t border-border">
-          <div className="flex overflow-x-auto px-2">
-            {navItems.map(({ path, icon: Icon, label }) => {
+        {/* Mobile nav */}
+        <div className="md:hidden border-t border-border/60">
+          <div className="flex overflow-x-auto px-2 gap-0.5">
+            {navItems.map(({ path, icon: Icon, label, emoji }) => {
               const isActive = location.pathname === path;
               return (
                 <button
                   key={path}
                   onClick={() => navigate(path)}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold whitespace-nowrap transition-colors ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold whitespace-nowrap transition-all ${
                     isActive
                       ? 'text-primary border-b-2 border-primary'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <span className="text-sm">{emoji}</span>
                   {label}
                 </button>
               );
@@ -109,7 +114,7 @@ const AppLayout = ({ children, streakTimer }: AppLayoutProps) => {
       </header>
 
       {/* Content */}
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-6">{children}</main>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">{children}</main>
 
       {/* Overlay screens */}
       {streakTimer?.isActive && streakTimer.phase === 'break' && (
@@ -120,12 +125,13 @@ const AppLayout = ({ children, streakTimer }: AppLayoutProps) => {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card/50 py-4">
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-between text-xs text-muted-foreground">
-          <span>© 2026 EduBlast — Learn thru Questions</span>
-          <div className="flex gap-4">
-            <button onClick={() => navigate('/pricing')} className="hover:text-foreground transition-colors">Pricing</button>
-            <button onClick={() => navigate('/profile')} className="hover:text-foreground transition-colors">Profile</button>
+      <footer className="border-t border-border/60 bg-card/40 py-5">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+          <span className="font-bold">© 2026 EduBlast — Learn thru Questions 🎯</span>
+          <div className="flex gap-6">
+            <button onClick={() => navigate('/pricing')} className="hover:text-foreground transition-colors font-bold">Pricing</button>
+            <button onClick={() => navigate('/profile')} className="hover:text-foreground transition-colors font-bold">Profile</button>
+            <button onClick={() => navigate('/explore')} className="hover:text-foreground transition-colors font-bold">Explore</button>
           </div>
         </div>
       </footer>
