@@ -1,8 +1,10 @@
+import { motion } from 'framer-motion';
 import AppLayout from '@/components/AppLayout';
 import { useUserStore } from '@/store/useUserStore';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { User, LogOut, BookOpen, Trophy, Coins, Target, Clock } from 'lucide-react';
+import { User, LogOut, BookOpen, Trophy, Coins, Target } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 const Profile = () => {
   const user = useUserStore((s) => s.user);
@@ -18,29 +20,34 @@ const Profile = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto space-y-6">
         {/* Profile header */}
-        <div className="bg-card rounded-2xl p-8 border border-border flex flex-col sm:flex-row items-center gap-6 mb-6">
-          <div className="w-20 h-20 gradient-primary rounded-full flex items-center justify-center shrink-0">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="edu-card p-8 flex flex-col sm:flex-row items-center gap-6"
+        >
+          <div className="w-20 h-20 gradient-primary rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
             <User className="w-10 h-10 text-primary-foreground" />
           </div>
-          <div className="text-center sm:text-left">
+          <div className="text-center sm:text-left flex-1">
             <h2 className="text-2xl font-display text-foreground">{user.name}</h2>
-            <p className="text-muted-foreground">
-              Class {user.classLevel} · {user.subjectCombo}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 mt-2 justify-center sm:justify-start">
+              <span className="edu-chip bg-primary/10 text-primary">🎓 Class {user.classLevel}</span>
+              <span className="edu-chip bg-edu-green/10 text-edu-green">📚 {user.subjectCombo}</span>
+            </div>
           </div>
-          <div className="sm:ml-auto flex gap-3">
+          <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={() => navigate('/pricing')}
-              className="rounded-xl"
+              className="rounded-xl font-extrabold"
             >
               <Coins className="w-4 h-4 mr-2" /> Top Up
             </Button>
             <Button
               variant="outline"
-              className="rounded-xl text-destructive hover:text-destructive"
+              className="rounded-xl font-extrabold text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={() => {
                 logout();
                 navigate('/');
@@ -49,47 +56,55 @@ const Profile = () => {
               <LogOut className="w-4 h-4 mr-2" /> Log Out
             </Button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <div className="bg-card rounded-2xl p-5 border border-border text-center">
-            <Coins className="w-6 h-6 text-edu-orange mx-auto mb-2" />
-            <span className="text-2xl font-bold text-foreground block">{user.rdm}</span>
-            <span className="text-xs text-muted-foreground">RDM Balance</span>
-          </div>
-          <div className="bg-card rounded-2xl p-5 border border-border text-center">
-            <Trophy className="w-6 h-6 text-edu-yellow mx-auto mb-2" />
-            <span className="text-2xl font-bold text-foreground block">{accuracy}%</span>
-            <span className="text-xs text-muted-foreground">Accuracy</span>
-          </div>
-          <div className="bg-card rounded-2xl p-5 border border-border text-center">
-            <BookOpen className="w-6 h-6 text-edu-blue mx-auto mb-2" />
-            <span className="text-2xl font-bold text-foreground block">{allResults.length}</span>
-            <span className="text-xs text-muted-foreground">Answered</span>
-          </div>
-          <div className="bg-card rounded-2xl p-5 border border-border text-center">
-            <Target className="w-6 h-6 text-edu-green mx-auto mb-2" />
-            <span className="text-2xl font-bold text-foreground block">{user.savedQuestions.length}</span>
-            <span className="text-xs text-muted-foreground">Saved</span>
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { icon: Coins, label: 'RDM Balance', value: user.rdm, color: 'text-edu-orange', bg: 'bg-edu-orange/10' },
+            { icon: Trophy, label: 'Accuracy', value: `${accuracy}%`, color: 'text-edu-yellow', bg: 'bg-edu-yellow/10' },
+            { icon: BookOpen, label: 'Answered', value: allResults.length, color: 'text-edu-blue', bg: 'bg-edu-blue/10' },
+            { icon: Target, label: 'Saved', value: user.savedQuestions.length, color: 'text-edu-green', bg: 'bg-edu-green/10' },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08 }}
+              className="edu-stat-card"
+            >
+              <div className={`w-11 h-11 ${stat.bg} rounded-xl flex items-center justify-center mx-auto mb-3`}>
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              </div>
+              <span className="text-2xl font-extrabold text-foreground block">{stat.value}</span>
+              <span className="text-xs text-muted-foreground font-bold">{stat.label}</span>
+            </motion.div>
+          ))}
         </div>
 
         {/* Performance bar */}
-        <div className="bg-card rounded-2xl p-6 border border-border">
-          <h3 className="font-bold text-foreground mb-3">Performance</h3>
-          <div className="flex items-center gap-4">
-            <div className="flex-1 bg-muted rounded-full h-4 overflow-hidden">
-              <div
-                className="bg-accent h-full rounded-full transition-all"
-                style={{ width: `${accuracy}%` }}
-              />
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="edu-card p-6"
+        >
+          <h3 className="font-display text-lg text-foreground mb-4">Performance</h3>
+          <div className="space-y-3">
+            <Progress value={accuracy} className="h-4 rounded-full" />
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-extrabold text-edu-green flex items-center gap-1">
+                ✓ {totalCorrect} Correct
+              </span>
+              <span className="font-extrabold text-destructive flex items-center gap-1">
+                ✗ {totalWrong} Wrong
+              </span>
+              <span className="font-extrabold text-foreground">
+                {accuracy}% Accuracy
+              </span>
             </div>
-            <span className="text-sm text-muted-foreground font-bold whitespace-nowrap">
-              {totalCorrect} ✓ · {totalWrong} ✗
-            </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </AppLayout>
   );
