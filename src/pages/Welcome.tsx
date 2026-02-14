@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '@/store/useUserStore';
-import { ClassLevel, Stream, SubjectCombo } from '@/types';
+import { ClassLevel, SubjectCombo } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Zap, BookOpen, Trophy, Sparkles } from 'lucide-react';
@@ -11,12 +11,11 @@ const Welcome = () => {
   const [step, setStep] = useState<'welcome' | 'signup' | 'bonus'>(user?.isSignedUp ? 'bonus' : 'welcome');
   const [name, setName] = useState('');
   const [classLevel, setClassLevel] = useState<ClassLevel>(11);
-  const [stream, setStream] = useState<Stream>('science');
   const [subjectCombo, setSubjectCombo] = useState<SubjectCombo>('PCM');
 
   const handleSignup = () => {
     if (!name.trim()) return;
-    signup(name.trim(), classLevel, stream, subjectCombo);
+    signup(name.trim(), classLevel, 'science', subjectCombo);
     setStep('bonus');
     // Trigger confetti
     import('canvas-confetti').then((confetti) => {
@@ -111,47 +110,26 @@ const Welcome = () => {
               </div>
 
               <div>
-                <label className="text-sm font-bold text-foreground mb-2 block">Stream</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['science', 'commerce', 'arts'] as Stream[]).map((s) => (
+                <label className="text-sm font-bold text-foreground mb-2 block">Subject Combo</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['PCM', 'PCMB'] as SubjectCombo[]).map((sc) => (
                     <button
-                      key={s}
-                      onClick={() => setStream(s)}
-                      className={`py-2 rounded-xl font-bold text-sm capitalize transition-all ${
-                        stream === s
-                          ? 'bg-secondary text-secondary-foreground shadow-md scale-105'
+                      key={sc}
+                      onClick={() => setSubjectCombo(sc)}
+                      className={`py-3 rounded-xl font-bold transition-all ${
+                        subjectCombo === sc
+                          ? 'bg-accent text-accent-foreground shadow-md scale-105'
                           : 'bg-muted text-muted-foreground hover:bg-muted/80'
                       }`}
                     >
-                      {s}
+                      {sc}
+                      <span className="block text-xs font-normal mt-0.5 opacity-70">
+                        {sc === 'PCM' ? 'Physics, Chem, Math' : 'Physics, Chem, Math, Bio'}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
-
-              {stream === 'science' && (
-                <div>
-                  <label className="text-sm font-bold text-foreground mb-2 block">Subject Combo</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(['PCM', 'PCMB'] as SubjectCombo[]).map((sc) => (
-                      <button
-                        key={sc}
-                        onClick={() => setSubjectCombo(sc)}
-                        className={`py-3 rounded-xl font-bold transition-all ${
-                          subjectCombo === sc
-                            ? 'bg-accent text-accent-foreground shadow-md scale-105'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                      >
-                        {sc}
-                        <span className="block text-xs font-normal mt-0.5 opacity-70">
-                          {sc === 'PCM' ? 'Physics, Chem, Math' : 'Physics, Chem, Math, Bio'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <Button
                 onClick={handleSignup}
