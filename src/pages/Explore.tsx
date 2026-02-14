@@ -42,94 +42,90 @@ const Explore = () => {
 
   return (
     <AppLayout>
-      <div className="p-4 pb-8">
-        {!showQuestions ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <h2 className="text-2xl font-display text-foreground mb-1 flex items-center gap-2">
-              <Search className="w-6 h-6" /> Explore
-            </h2>
-            <p className="text-muted-foreground text-sm mb-6">
-              Find questions by subject, topic, or exam type
-            </p>
+      {!showQuestions ? (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-display text-foreground mb-2 flex items-center gap-2">
+            <Search className="w-7 h-7" /> Explore Learning
+          </h2>
+          <p className="text-muted-foreground mb-8">
+            Find questions by subject, topic, or exam type
+          </p>
 
-            <div className="mb-5">
-              <h3 className="text-sm font-bold text-foreground mb-2">Subject</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {subjects.map((s) => (
-                  <button
-                    key={s.value}
-                    onClick={() => setSelectedSubject(selectedSubject === s.value ? null : s.value)}
-                    className={`p-3 rounded-2xl text-left transition-all ${
-                      selectedSubject === s.value
-                        ? `${s.color} text-primary-foreground shadow-lg scale-[1.02]`
-                        : 'bg-card border border-border hover:shadow'
-                    }`}
-                  >
-                    <span className="text-2xl">{s.emoji}</span>
-                    <span className="block font-bold text-sm mt-1">{s.label}</span>
-                  </button>
-                ))}
-              </div>
+          <div className="mb-6">
+            <h3 className="text-sm font-bold text-foreground mb-3">Subject</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {subjects.map((s) => (
+                <button
+                  key={s.value}
+                  onClick={() => setSelectedSubject(selectedSubject === s.value ? null : s.value)}
+                  className={`p-4 rounded-2xl text-left transition-all ${
+                    selectedSubject === s.value
+                      ? `${s.color} text-primary-foreground shadow-lg scale-[1.02]`
+                      : 'bg-card border border-border hover:shadow-md'
+                  }`}
+                >
+                  <span className="text-3xl">{s.emoji}</span>
+                  <span className="block font-bold text-sm mt-2">{s.label}</span>
+                </button>
+              ))}
             </div>
-
-            <div className="mb-6">
-              <h3 className="text-sm font-bold text-foreground mb-2">Exam Type</h3>
-              <div className="flex gap-2 flex-wrap">
-                {exams.map((e) => (
-                  <button
-                    key={e.value}
-                    onClick={() => setSelectedExam(selectedExam === e.value ? null : e.value)}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                      selectedExam === e.value
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    {e.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              onClick={applyFilter}
-              size="lg"
-              className="w-full rounded-xl font-bold gradient-primary text-primary-foreground border-0"
-            >
-              <Filter className="w-5 h-5 mr-1" /> Find Questions
-            </Button>
-          </motion.div>
-        ) : (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <Button variant="ghost" size="sm" onClick={() => setShowQuestions(false)} className="rounded-full text-xs">
-                ← Back to filters
-              </Button>
-              <span className="text-xs text-muted-foreground">
-                {filteredQuestions.length} questions found
-              </span>
-            </div>
-            {filteredQuestions.length > 0 ? (
-              <>
-                <QuestionCard
-                  question={filteredQuestions[currentIndex]}
-                  onNext={() => {
-                    if (currentIndex < filteredQuestions.length - 1) {
-                      setCurrentIndex((i) => i + 1);
-                    } else {
-                      setShowQuestions(false);
-                    }
-                  }}
-                />
-              </>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No questions match your filters.</p>
-              </div>
-            )}
           </div>
-        )}
-      </div>
+
+          <div className="mb-8">
+            <h3 className="text-sm font-bold text-foreground mb-3">Exam Type</h3>
+            <div className="flex gap-2 flex-wrap">
+              {exams.map((e) => (
+                <button
+                  key={e.value}
+                  onClick={() => setSelectedExam(selectedExam === e.value ? null : e.value)}
+                  className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+                    selectedExam === e.value
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {e.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Button
+            onClick={applyFilter}
+            size="lg"
+            className="rounded-xl font-bold gradient-primary text-primary-foreground border-0 px-10"
+          >
+            <Filter className="w-5 h-5 mr-2" /> Find Questions
+          </Button>
+        </motion.div>
+      ) : (
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <Button variant="ghost" size="sm" onClick={() => setShowQuestions(false)} className="rounded-full">
+              ← Back to filters
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {filteredQuestions.length} questions found
+            </span>
+          </div>
+          {filteredQuestions.length > 0 ? (
+            <QuestionCard
+              question={filteredQuestions[currentIndex]}
+              onNext={() => {
+                if (currentIndex < filteredQuestions.length - 1) {
+                  setCurrentIndex((i) => i + 1);
+                } else {
+                  setShowQuestions(false);
+                }
+              }}
+            />
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground">No questions match your filters.</p>
+            </div>
+          )}
+        </div>
+      )}
     </AppLayout>
   );
 };
