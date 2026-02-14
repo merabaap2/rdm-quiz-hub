@@ -6,19 +6,22 @@ import { Question, Subject } from '@/types';
 import QuestionCard from '@/components/QuestionCard';
 import AppLayout from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Crosshair, Zap, ArrowRight } from 'lucide-react';
+import { Crosshair, Zap, ArrowRight, Square, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useStreakTimer } from '@/hooks/useStreakTimer';
 
 const HomePage = () => {
   const user = useUserStore((s) => s.user);
   const clearRound = useUserStore((s) => s.clearRound);
   const currentRound = useUserStore((s) => s.currentRound);
   const navigate = useNavigate();
+  const streakTimer = useStreakTimer();
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [roundComplete, setRoundComplete] = useState(false);
   const [fired, setFired] = useState(false);
+  const [lastRoundQuestions, setLastRoundQuestions] = useState<Question[]>([]);
 
   const subjects: Subject[] = useMemo(() => {
     if (!user) return ['physics', 'chemistry', 'math'];
@@ -34,23 +37,41 @@ const HomePage = () => {
     setCurrentIndex(0);
     setRoundComplete(false);
     setFired(true);
+    if (!streakTimer.isActive) streakTimer.startStreak();
+  };
+
+  const repeatWithVariants = () => {
+    if (!user || lastRoundQuestions.length === 0) return;
+    clearRound();
+    // Shuffle same questions for "repeat with different order"
+    const shuffled = [...lastRoundQuestions].sort(() => Math.random() - 0.5);
+    setQuestions(shuffled);
+    setCurrentIndex(0);
+    setRoundComplete(false);
+    setFired(true);
   };
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
+      setLastRoundQuestions([...questions]);
       setRoundComplete(true);
     }
   };
 
-  // ProtectedRoute already handles redirect if no user
+  const handleStop = () => {
+    streakTimer.stopStreak();
+    setFired(false);
+    setRoundComplete(false);
+    setQuestions([]);
+  };
 
   const correctCount = currentRound.filter((r) => r.isCorrect).length;
   const wrongCount = currentRound.filter((r) => !r.isCorrect).length;
 
   return (
-    <AppLayout>
+    <AppLayout streakTimer={streakTimer}>
       <div className="p-4 pb-8">
         <AnimatePresence mode="wait">
           {!fired && (
@@ -79,7 +100,7 @@ const HomePage = () => {
                 <Zap className="w-6 h-6 mr-2" />
                 Fire! 🔥
               </Button>
-              {user.rdm <= 0 && (
+              {user && user.rdm <= 0 && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -153,10 +174,13 @@ const HomePage = () => {
                   <span className="text-xs text-muted-foreground ml-1">Wrong</span>
                 </div>
               </div>
-              <p className="text-muted-foreground mb-6 text-sm">
+              <p className="text-muted-foreground mb-2 text-sm">
                 {correctCount >= 4
                   ? 'Amazing work! 🎉'
                   : 'Keep practicing, you got this!'}
+              </p>
+              <p className="text-xs text-muted-foreground mb-6">
+                Do you want to keep going or stop?
               </p>
               <div className="flex flex-col gap-3 w-full max-w-xs">
                 <Button
@@ -164,7 +188,15 @@ const HomePage = () => {
                   size="lg"
                   className="rounded-full font-bold gradient-primary text-primary-foreground border-0"
                 >
-                  <Zap className="w-5 h-5 mr-1" /> More Questions
+                  <Zap className="w-5 h-5 mr-1" /> Keep Going! 🔥
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={repeatWithVariants}
+                  className="rounded-full font-bold"
+                >
+                  <RotateCcw className="w-4 h-4 mr-1" /> Repeat Previous Round
                 </Button>
                 <Button
                   variant="outline"
@@ -173,6 +205,14 @@ const HomePage = () => {
                   className="rounded-full font-bold"
                 >
                   Want specific topics? <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={handleStop}
+                  className="rounded-full font-bold text-muted-foreground"
+                >
+                  <Square className="w-4 h-4 mr-1" /> Stop
                 </Button>
               </div>
             </motion.div>

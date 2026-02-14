@@ -3,6 +3,7 @@ export type Stream = 'science' | 'commerce' | 'arts';
 export type SubjectCombo = 'PCM' | 'PCMB';
 export type ExamType = 'JEE' | 'NEET' | 'KCET' | 'other';
 export type ClassLevel = 9 | 10 | 11 | 12;
+export type StreakPhase = 'playing' | 'break' | 'recall';
 
 export interface Question {
   id: string;
