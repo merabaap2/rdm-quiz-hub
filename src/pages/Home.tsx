@@ -44,10 +44,7 @@ const HomePage = () => {
     }
   };
 
-  if (!user) {
-    navigate('/');
-    return null;
-  }
+  // ProtectedRoute already handles redirect if no user
 
   const correctCount = currentRound.filter((r) => r.isCorrect).length;
   const wrongCount = currentRound.filter((r) => !r.isCorrect).length;

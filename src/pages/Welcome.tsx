@@ -5,9 +5,11 @@ import { ClassLevel, SubjectCombo } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Zap, BookOpen, Trophy, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Welcome = () => {
   const { user, signup } = useUserStore();
+  const navigate = useNavigate();
   const [step, setStep] = useState<'welcome' | 'signup' | 'bonus'>(user?.isSignedUp ? 'bonus' : 'welcome');
   const [name, setName] = useState('');
   const [classLevel, setClassLevel] = useState<ClassLevel>(11);
@@ -170,7 +172,7 @@ const Welcome = () => {
             </motion.div>
             <div>
               <Button
-                onClick={() => (window.location.href = '/home')}
+                onClick={() => navigate('/home')}
                 size="lg"
                 className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-full px-10 text-lg font-bold"
               >

@@ -10,10 +10,8 @@ const Profile = () => {
   const allResults = useUserStore((s) => s.allResults);
   const navigate = useNavigate();
 
-  if (!user) {
-    navigate('/');
-    return null;
-  }
+  // ProtectedRoute already handles redirect if no user
+  if (!user) return null;
 
   const totalCorrect = allResults.filter((r) => r.isCorrect).length;
   const totalWrong = allResults.filter((r) => !r.isCorrect).length;
@@ -29,7 +27,7 @@ const Profile = () => {
           </div>
           <h2 className="text-xl font-display text-foreground">{user.name}</h2>
           <p className="text-sm text-muted-foreground">
-            Class {user.classLevel} · {user.stream} · {user.subjectCombo}
+            Class {user.classLevel} · {user.subjectCombo}
           </p>
         </div>
 
