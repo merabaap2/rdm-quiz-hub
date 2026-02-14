@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserStore } from '@/store/useUserStore';
-import { Home, Compass, BookMarked, User, Coins, Settings, Crown } from 'lucide-react';
+import { LayoutDashboard, Crosshair, Compass, BookMarked, User, Coins, Settings, Crown } from 'lucide-react';
 import StreakTimer from '@/components/StreakTimer';
 import BreakScreen from '@/components/BreakScreen';
 import RecallExercise from '@/components/RecallExercise';
@@ -13,7 +13,8 @@ interface AppLayoutProps {
 }
 
 const navItems = [
-  { path: '/home', icon: Home, label: 'Home' },
+  { path: '/home', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/play', icon: Crosshair, label: 'Play' },
   { path: '/explore', icon: Compass, label: 'Explore' },
   { path: '/revision', icon: BookMarked, label: 'Revision' },
   { path: '/pricing', icon: Crown, label: 'Plans' },
