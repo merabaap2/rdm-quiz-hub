@@ -1,83 +1,69 @@
 
 
-# EduBlast - Complete the Missing Features
+# Expand Question Database - All Topics, All Subjects, All Classes
 
-## What's Already Working
-- Signup with Class (9-12) and PCM/PCMB selection
-- Question Gun with 5-question rounds
-- RDM system (+10/-5, 100 bonus)
-- Explore by subject/exam type
-- Revision Bank (save/unsave questions)
-- Pricing page with mock top-up
-- Bottom tab navigation and top bar with RDM display
+## Current State
+The database has only **16 questions total** -- about 3-4 per subject with minimal topic coverage. Students quickly exhaust the question pool.
 
-## What's Missing (to be implemented)
+## What Will Be Added
 
-### 1. 25-Minute Streak Timer + Break System
-- Add a visible countdown timer in the top bar that starts when the user begins answering
-- At 25 minutes: award +50 RDM bonus with confetti, then force a 5-minute break
-- During break: show random activities from `breakActivities.ts` (puzzles, jokes, brain teasers)
-- Break screen with a 5-minute countdown - user cannot skip
-- New `useStreakTimer` hook to manage timer state
+A comprehensive expansion to **~120+ questions** covering all major syllabus topics for Classes 9-12, with a mix of easy, medium, and exam-level (mock) questions.
 
-### 2. Post-Break "Cheat AI" Recall Exercise (2 mins)
-- After the 5-minute break ends, show a 2-minute recall screen
-- Display summaries of the questions answered in the last session
-- User taps to reveal answers (testing memory)
-- Timer counts down from 2 minutes, then returns to Question Gun
+### Physics Topics & Question Count
+| Class | Topics | Questions |
+|-------|--------|-----------|
+| 9 | Motion, Force & Laws of Motion, Gravitation, Work & Energy, Sound | 8 |
+| 10 | Light (Reflection & Refraction), Electricity, Magnetic Effects, Sources of Energy | 8 |
+| 11 | Units & Measurements, Kinematics, Laws of Motion, Work-Energy-Power, Gravitation, Thermodynamics, Waves | 10 |
+| 12 | Electrostatics, Current Electricity, Magnetism, Electromagnetic Induction, Optics, Modern Physics | 10 |
 
-### 3. "Stop or Keep Continuing?" Prompt
-- After each 5-question round completes, add a "Stop or Keep Continuing?" choice
-- "Keep Going" fires another round immediately
-- "Stop" returns to the home screen (already partially there with the round-complete screen, just needs the stop option)
+### Chemistry Topics & Question Count
+| Class | Topics | Questions |
+|-------|--------|-----------|
+| 9 | Matter, Atoms & Molecules, Structure of Atom | 6 |
+| 10 | Chemical Reactions, Acids-Bases-Salts, Metals & Non-metals, Carbon Compounds, Periodic Table | 8 |
+| 11 | Atomic Structure, Chemical Bonding, States of Matter, Thermodynamics, Equilibrium, Organic Chemistry Basics | 10 |
+| 12 | Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, p-Block Elements, Coordination Compounds | 10 |
 
-### 4. "Repeat with Different Numerals" Option
-- After a round, offer "Repeat previous with different numerals or related concept"
-- Generate variant questions by swapping numbers/values in the same question templates
-- Add a `variants` field to the Question type or generate them on-the-fly
+### Math Topics & Question Count
+| Class | Topics | Questions |
+|-------|--------|-----------|
+| 9 | Number Systems, Polynomials, Coordinate Geometry, Linear Equations, Triangles, Statistics | 8 |
+| 10 | Real Numbers, Polynomials, Quadratic Equations, Arithmetic Progressions, Trigonometry, Coordinate Geometry | 8 |
+| 11 | Sets, Relations & Functions, Trigonometric Functions, Complex Numbers, Sequences & Series, Straight Lines, Probability | 10 |
+| 12 | Relations & Functions, Inverse Trig, Matrices, Determinants, Continuity & Differentiability, Integrals, Vectors, Probability | 10 |
 
-### 5. Fix Console Warnings
-- The `framer-motion` ref warnings in `QuestionCard` and `Explore` need fixing
-- Wrap animated components properly to avoid React ref forwarding issues
+### Biology Topics & Question Count (for PCMB students)
+| Class | Topics | Questions |
+|-------|--------|-----------|
+| 9 | Cell Biology, Tissues, Diversity in Living Organisms, Disease & Health | 6 |
+| 10 | Life Processes, Control & Coordination, Reproduction, Heredity & Evolution, Environment | 8 |
+| 11 | Cell Biology, Plant Physiology, Human Physiology, Biomolecules, Cell Division | 8 |
+| 12 | Genetics, Molecular Biology, Evolution, Human Health, Biotechnology, Ecology | 10 |
 
-## Technical Plan
+## Question Difficulty Mix
+Each topic will include a spread of difficulty:
+- **Easy** -- straightforward recall/definition questions (good for Class 9-10 and warm-up)
+- **Medium** -- application-based questions requiring understanding
+- **Mock/Exam-level** -- JEE/NEET/KCET style questions with tricky options
 
-### New Files
-- `src/hooks/useStreakTimer.ts` - Timer hook managing 25-min streak, 5-min break, 2-min recall phases
-- `src/components/BreakScreen.tsx` - Break activity display with countdown
-- `src/components/RecallExercise.tsx` - Post-break recall exercise component
-- `src/components/StreakTimer.tsx` - Visual timer component for the top bar
+The difficulty is indicated by exam tags: `['other']` for easy, `['KCET']` for medium, `['JEE', 'NEET']` for harder.
 
-### Modified Files
-- `src/components/AppLayout.tsx` - Integrate streak timer in top bar; show BreakScreen/RecallExercise overlays when active
-- `src/pages/Home.tsx` - Add "Stop or Keep Continuing?" and "Repeat with variants" options in round-complete screen
-- `src/store/useUserStore.ts` - Add streak phase tracking (playing/break/recall)
-- `src/types/index.ts` - Add `StreakPhase` type
-- `src/components/QuestionCard.tsx` - Fix framer-motion ref warnings
-- `src/data/questions.ts` - Add more questions (at least 3 per subject per class for 9-12)
+## Technical Details
 
-### Flow
+### File Changed
+- `src/data/questions.ts` -- Replace the current 16 questions with ~120+ questions organized by subject and class level
 
-```text
-[Start Playing] --> [25-min Timer Running]
-       |                    |
-  [Answer Questions]   [25 min reached]
-       |                    |
-  [Round Complete]    [+50 RDM Bonus]
-       |                    |
-  [Stop / Continue?]  [5-min Break Screen]
-       |                    |
-  [Repeat Variants]   [Break Activities]
-                           |
-                    [2-min Recall Exercise]
-                           |
-                    [Back to Questions]
-```
+### Question Format (unchanged)
+Each question follows the existing `Question` interface with `id`, `subject`, `topic`, `classLevel`, `examType`, `question`, `options`, `correctAnswer`, `hint`, `solution`, and `reference` (with `theory`, `relatedTopics`, `applicationExample`, and optional `inventor`/`youtubeUrl`).
 
-### Implementation Order
-1. Fix console warnings first (quick win)
-2. Add streak timer hook and UI component
-3. Build break screen with activity cards
-4. Build recall exercise screen
-5. Update Home.tsx with stop/continue and repeat options
-6. Add more questions to the database
+### ID Convention
+Questions will use a consistent naming: `{subject-prefix}-{class}-{number}`
+- Physics: `phy-9-1`, `phy-10-1`, `phy-11-1`, `phy-12-1`
+- Chemistry: `chem-9-1`, `chem-10-1`, etc.
+- Math: `math-9-1`, `math-10-1`, etc.
+- Biology: `bio-9-1`, `bio-10-1`, etc.
+
+### No other files need changes
+The existing filter functions (`getQuestionsBySubject`, `getRandomQuestions`, etc.) already work with any number of questions -- they just need more data to pull from.
+
