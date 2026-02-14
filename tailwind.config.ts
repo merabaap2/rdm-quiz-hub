@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Nunito', 'sans-serif'],
+        display: ['Fredoka One', 'cursive'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,6 +60,15 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        edu: {
+          purple: "hsl(var(--edu-purple))",
+          blue: "hsl(var(--edu-blue))",
+          green: "hsl(var(--edu-green))",
+          orange: "hsl(var(--edu-orange))",
+          pink: "hsl(var(--edu-pink))",
+          yellow: "hsl(var(--edu-yellow))",
+          red: "hsl(var(--edu-red))",
         },
       },
       borderRadius: {
