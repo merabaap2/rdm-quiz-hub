@@ -1,16 +1,22 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserStore } from '@/store/useUserStore';
-import { Home, Compass, BookMarked, User, Coins, Flame, Settings } from 'lucide-react';
+import { Home, Compass, BookMarked, User, Coins, Settings } from 'lucide-react';
+import StreakTimer from '@/components/StreakTimer';
+import BreakScreen from '@/components/BreakScreen';
+import RecallExercise from '@/components/RecallExercise';
+import { useStreakTimer } from '@/hooks/useStreakTimer';
 
 interface AppLayoutProps {
   children: ReactNode;
+  streakTimer?: ReturnType<typeof useStreakTimer>;
 }
 
-const AppLayout = ({ children }: AppLayoutProps) => {
+const AppLayout = ({ children, streakTimer }: AppLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useUserStore((s) => s.user);
+  const allResults = useUserStore((s) => s.allResults);
 
   const tabs = [
     { path: '/home', icon: Home, label: 'Home' },
@@ -25,19 +31,19 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       <header className="sticky top-0 z-40 bg-card/95 backdrop-blur border-b border-border px-4 py-3">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <h1 className="text-xl font-display text-primary">EduBlast</h1>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {streakTimer?.isActive && (
+              <StreakTimer
+                phase={streakTimer.phase}
+                secondsLeft={streakTimer.secondsLeft}
+                totalSeconds={streakTimer.totalSeconds}
+              />
+            )}
             {user && (
-              <>
-                <div className="flex items-center gap-1 bg-edu-yellow/20 px-3 py-1 rounded-full">
-                  <Coins className="w-4 h-4 text-edu-orange" />
-                  <span className="font-bold text-sm text-foreground">{user.rdm}</span>
-                  <span className="text-xs text-muted-foreground">RDM</span>
-                </div>
-                <div className="flex items-center gap-1 bg-destructive/10 px-2 py-1 rounded-full">
-                  <Flame className="w-4 h-4 text-destructive" />
-                  <span className="font-bold text-xs text-foreground">{user.streakMinutes}m</span>
-                </div>
-              </>
+              <div className="flex items-center gap-1 bg-edu-yellow/20 px-2.5 py-1 rounded-full">
+                <Coins className="w-3.5 h-3.5 text-edu-orange" />
+                <span className="font-bold text-xs text-foreground">{user.rdm}</span>
+              </div>
             )}
             <button
               onClick={() => navigate('/profile')}
@@ -51,6 +57,14 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
       {/* Content */}
       <main className="flex-1 max-w-lg mx-auto w-full">{children}</main>
+
+      {/* Overlay screens */}
+      {streakTimer?.isActive && streakTimer.phase === 'break' && (
+        <BreakScreen secondsLeft={streakTimer.secondsLeft} />
+      )}
+      {streakTimer?.isActive && streakTimer.phase === 'recall' && (
+        <RecallExercise secondsLeft={streakTimer.secondsLeft} recentResults={allResults.slice(-5)} />
+      )}
 
       {/* Bottom Tab Bar */}
       <nav className="sticky bottom-0 z-40 bg-card/95 backdrop-blur border-t border-border">
