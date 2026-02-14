@@ -1,69 +1,118 @@
 
 
-# Expand Question Database - All Topics, All Subjects, All Classes
+# Explore Page: Hierarchical Topic & Subtopic Browser
 
-## Current State
-The database has only **16 questions total** -- about 3-4 per subject with minimal topic coverage. Students quickly exhaust the question pool.
+## Overview
+Transform the Explore page from a simple filter-and-go interface into a **drill-down topic browser**. When a student clicks a subject (e.g., Physics), they see topics organized by class, with expandable subtopics -- matching the comprehensive syllabus taxonomy provided.
 
-## What Will Be Added
+## Current Problem
+Right now, clicking Physics just highlights the card. Students then click "Find Questions" and get a random mix. There's no way to browse by topic or subtopic.
 
-A comprehensive expansion to **~120+ questions** covering all major syllabus topics for Classes 9-12, with a mix of easy, medium, and exam-level (mock) questions.
+## New User Flow
 
-### Physics Topics & Question Count
-| Class | Topics | Questions |
-|-------|--------|-----------|
-| 9 | Motion, Force & Laws of Motion, Gravitation, Work & Energy, Sound | 8 |
-| 10 | Light (Reflection & Refraction), Electricity, Magnetic Effects, Sources of Energy | 8 |
-| 11 | Units & Measurements, Kinematics, Laws of Motion, Work-Energy-Power, Gravitation, Thermodynamics, Waves | 10 |
-| 12 | Electrostatics, Current Electricity, Magnetism, Electromagnetic Induction, Optics, Modern Physics | 10 |
+```text
+Step 1: Select Subject
+  [Physics]  [Chemistry]  [Math]  [Biology]
 
-### Chemistry Topics & Question Count
-| Class | Topics | Questions |
-|-------|--------|-----------|
-| 9 | Matter, Atoms & Molecules, Structure of Atom | 6 |
-| 10 | Chemical Reactions, Acids-Bases-Salts, Metals & Non-metals, Carbon Compounds, Periodic Table | 8 |
-| 11 | Atomic Structure, Chemical Bonding, States of Matter, Thermodynamics, Equilibrium, Organic Chemistry Basics | 10 |
-| 12 | Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, p-Block Elements, Coordination Compounds | 10 |
+Step 2: See Topics by Class (accordion/expandable sections)
+  Class 9
+    > Motion (8 questions)
+        - Distance & Displacement
+        - Uniform & Non-Uniform Motion
+        - Equations of Motion
+        - Uniform Circular Motion
+    > Force and Laws of Motion (5 questions)
+        - Newton's Three Laws
+        - Inertia and Mass
+        - Conservation of Momentum
+    > Gravitation ...
+    > Work and Energy ...
+    > Sound ...
 
-### Math Topics & Question Count
-| Class | Topics | Questions |
-|-------|--------|-----------|
-| 9 | Number Systems, Polynomials, Coordinate Geometry, Linear Equations, Triangles, Statistics | 8 |
-| 10 | Real Numbers, Polynomials, Quadratic Equations, Arithmetic Progressions, Trigonometry, Coordinate Geometry | 8 |
-| 11 | Sets, Relations & Functions, Trigonometric Functions, Complex Numbers, Sequences & Series, Straight Lines, Probability | 10 |
-| 12 | Relations & Functions, Inverse Trig, Matrices, Determinants, Continuity & Differentiability, Integrals, Vectors, Probability | 10 |
+  Class 10
+    > Light: Reflection and Refraction ...
+    > Electricity ...
+    ...
 
-### Biology Topics & Question Count (for PCMB students)
-| Class | Topics | Questions |
-|-------|--------|-----------|
-| 9 | Cell Biology, Tissues, Diversity in Living Organisms, Disease & Health | 6 |
-| 10 | Life Processes, Control & Coordination, Reproduction, Heredity & Evolution, Environment | 8 |
-| 11 | Cell Biology, Plant Physiology, Human Physiology, Biomolecules, Cell Division | 8 |
-| 12 | Genetics, Molecular Biology, Evolution, Human Health, Biotechnology, Ecology | 10 |
+  Class 11
+    > Units and Measurements ...
+    > Kinematics ...
+    ...
 
-## Question Difficulty Mix
-Each topic will include a spread of difficulty:
-- **Easy** -- straightforward recall/definition questions (good for Class 9-10 and warm-up)
-- **Medium** -- application-based questions requiring understanding
-- **Mock/Exam-level** -- JEE/NEET/KCET style questions with tricky options
+  Class 12
+    > Electrostatics ...
+    > Current Electricity ...
+    ...
 
-The difficulty is indicated by exam tags: `['other']` for easy, `['KCET']` for medium, `['JEE', 'NEET']` for harder.
+Step 3: Click a topic -> filtered questions for that topic start
+```
+
+## What Gets Built
+
+### 1. Topic Taxonomy Data File (`src/data/topicTaxonomy.ts`)
+A new data file containing the full hierarchical syllabus for all 4 subjects. Each entry has:
+- Subject, Class, Topic name, Subtopics array, and exam relevance tags
+
+**Physics** (Classes 9-12): Motion, Force & Laws, Gravitation, Work & Energy, Sound, Light, Electricity, Magnetic Effects, Sources of Energy, Units & Measurements, Kinematics, Laws of Motion, Work-Energy-Power, Rotational Motion, Gravitation (advanced), Properties of Bulk Matter, Thermodynamics, Kinetic Theory, Oscillations & Waves, Electrostatics, Current Electricity, Magnetism, EMI & AC, EM Waves, Optics, Dual Nature, Atoms & Nuclei, Semiconductors
+
+**Chemistry** (Classes 9-12): Matter, Atoms & Molecules, Structure of Atom, Chemical Reactions, Acids-Bases-Salts, Metals & Non-metals, Carbon Compounds, Periodic Table, Atomic Structure, Chemical Bonding, States of Matter, Thermodynamics, Equilibrium, Organic Chemistry, Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, p-Block Elements, Coordination Compounds
+
+**Math** (Classes 9-12): Number Systems, Polynomials, Coordinate Geometry, Linear Equations, Triangles, Statistics, Real Numbers, Quadratic Equations, Arithmetic Progressions, Trigonometry, Sets, Relations & Functions, Trigonometric Functions, Complex Numbers, Sequences & Series, Straight Lines, Probability, Inverse Trig, Matrices, Determinants, Continuity & Differentiability, Integrals, Vectors
+
+**Biology** (Classes 9-12): Cell Biology, Tissues, Diversity in Living Organisms, Disease & Health, Life Processes, Control & Coordination, Reproduction, Heredity & Evolution, Structural Organization, Biomolecules, Plant Physiology, Human Physiology, Genetics & Molecular Biology, Evolution, Biotechnology, Ecology
+
+### 2. Redesigned Explore Page (`src/pages/Explore.tsx`)
+The page will have 3 views:
+
+**View 1 -- Subject Selection** (current, polished)
+- 4 subject cards with emoji, gradient, and question count
+- Exam type filter chips (JEE, NEET, KCET, Other)
+
+**View 2 -- Topic Browser** (NEW)
+- Shown after selecting a subject
+- Back button to return to subjects
+- Topics grouped under Class headers (Class 9, 10, 11, 12)
+- Each class section is collapsible (using Accordion component)
+- Each topic shows: name, question count badge, subtopics as small chips
+- Clicking a topic filters questions and starts the question flow
+- Class sections filtered based on user's class level
+
+**View 3 -- Question Flow** (existing, unchanged)
+- Shows filtered questions one by one with QuestionCard
+
+### 3. No Changes to Question Files
+The existing questions already have `topic` fields that match the taxonomy. The taxonomy data serves as the browsing structure -- questions are filtered by matching `q.topic` and `q.subject`.
 
 ## Technical Details
 
-### File Changed
-- `src/data/questions.ts` -- Replace the current 16 questions with ~120+ questions organized by subject and class level
+### New File
+- `src/data/topicTaxonomy.ts` -- Contains the `TopicNode` interface and full taxonomy array
 
-### Question Format (unchanged)
-Each question follows the existing `Question` interface with `id`, `subject`, `topic`, `classLevel`, `examType`, `question`, `options`, `correctAnswer`, `hint`, `solution`, and `reference` (with `theory`, `relatedTopics`, `applicationExample`, and optional `inventor`/`youtubeUrl`).
+### Modified File
+- `src/pages/Explore.tsx` -- Add topic browser view between subject selection and question flow
 
-### ID Convention
-Questions will use a consistent naming: `{subject-prefix}-{class}-{number}`
-- Physics: `phy-9-1`, `phy-10-1`, `phy-11-1`, `phy-12-1`
-- Chemistry: `chem-9-1`, `chem-10-1`, etc.
-- Math: `math-9-1`, `math-10-1`, etc.
-- Biology: `bio-9-1`, `bio-10-1`, etc.
+### Data Structure
+```text
+interface SubTopic {
+  name: string;
+}
 
-### No other files need changes
-The existing filter functions (`getQuestionsBySubject`, `getRandomQuestions`, etc.) already work with any number of questions -- they just need more data to pull from.
+interface TopicNode {
+  subject: Subject;
+  classLevel: ClassLevel;
+  topic: string;           // matches Question.topic field
+  subtopics: SubTopic[];
+  examRelevance: ExamType[];  // which exams focus on this topic
+}
+```
+
+### Filtering Logic
+- When user clicks a topic, filter: `questions.filter(q => q.subject === subject && q.topic === topic)`
+- Question count badges are computed dynamically from the actual question database
+- Topics with 0 questions still show (grayed out with "Coming soon" badge) so students see the full syllabus
+
+### Components Used
+- `Accordion` (already installed via radix) for collapsible class sections
+- `motion` from framer-motion for animations
+- Existing `QuestionCard` for the question flow
 
