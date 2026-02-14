@@ -16,40 +16,40 @@ const Revision = () => {
 
   return (
     <AppLayout>
-      <div className="p-4 pb-8">
-        <h2 className="text-2xl font-display text-foreground mb-1 flex items-center gap-2">
-          <BookMarked className="w-6 h-6" /> Revision Bank
+      <div className="max-w-3xl mx-auto">
+        <h2 className="text-3xl font-display text-foreground mb-2 flex items-center gap-2">
+          <BookMarked className="w-7 h-7" /> Revision Bank
         </h2>
-        <p className="text-muted-foreground text-sm mb-4">
+        <p className="text-muted-foreground mb-6">
           {savedQuestions.length} saved questions
         </p>
 
         {savedQuestions.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-5xl mb-3">📚</div>
-            <p className="text-muted-foreground text-sm">
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">📚</div>
+            <p className="text-muted-foreground">
               Save questions during practice to build your revision bank!
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             {savedQuestions.map((q) => (
               <motion.div key={q.id} layout>
                 {activeId === q.id ? (
-                  <div>
+                  <div className="sm:col-span-2">
                     <QuestionCard question={q} onNext={() => setActiveId(null)} />
                   </div>
                 ) : (
                   <button
                     onClick={() => setActiveId(q.id)}
-                    className="w-full bg-card rounded-2xl p-4 border border-border text-left hover:shadow transition-shadow"
+                    className="w-full bg-card rounded-2xl p-5 border border-border text-left hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span className="text-xs font-bold text-primary capitalize">
                           {q.subject} · {q.topic}
                         </span>
-                        <p className="text-sm font-semibold text-foreground mt-0.5 line-clamp-2">
+                        <p className="text-sm font-semibold text-foreground mt-1 line-clamp-2">
                           {q.question}
                         </p>
                       </div>
