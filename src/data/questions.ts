@@ -1,4 +1,4 @@
-import { Question } from '@/types';
+import { Question, Subject } from '@/types';
 
 export const questions: Question[] = [
   // PHYSICS
@@ -231,6 +231,42 @@ export const questions: Question[] = [
       applicationExample: 'Solar panels are inspired by the photosynthetic process of capturing light energy.',
     },
   },
+  // CLASS 9 - Physics
+  {
+    id: 'p-9-1', subject: 'physics', topic: 'Motion', classLevel: 9,
+    examType: ['other'], question: 'What is the SI unit of force?',
+    options: ['Newton', 'Joule', 'Watt', 'Pascal'], correctAnswer: 0,
+    hint: 'Think about F = ma and the units of mass and acceleration.',
+    solution: 'Force = mass × acceleration. SI unit = kg·m/s² = Newton (N).',
+    reference: { theory: 'Force is a push or pull that changes the state of motion.', relatedTopics: ['Newton\'s Laws', 'Acceleration', 'Mass'], applicationExample: 'Kicking a football applies force that changes its motion.' },
+  },
+  // CLASS 9 - Chemistry
+  {
+    id: 'c-9-1', subject: 'chemistry', topic: 'Matter', classLevel: 9,
+    examType: ['other'], question: 'Which of the following is a chemical change?',
+    options: ['Rusting of iron', 'Melting of ice', 'Dissolving sugar', 'Breaking glass'], correctAnswer: 0,
+    hint: 'A chemical change produces a new substance that cannot be easily reversed.',
+    solution: 'Rusting involves iron reacting with oxygen and moisture to form iron oxide — a new substance.',
+    reference: { theory: 'Chemical changes involve formation of new substances with different properties.', relatedTopics: ['Physical vs Chemical Changes', 'Oxidation'], applicationExample: 'Cooking an egg is a chemical change — it cannot be reversed.' },
+  },
+  // CLASS 9 - Math
+  {
+    id: 'm-9-1', subject: 'math', topic: 'Number Systems', classLevel: 9,
+    examType: ['other'], question: 'Which of the following is an irrational number?',
+    options: ['√2', '3/4', '0.5', '7'], correctAnswer: 0,
+    hint: 'An irrational number cannot be expressed as a simple fraction.',
+    solution: '√2 = 1.41421356... — it is non-terminating and non-repeating, hence irrational.',
+    reference: { theory: 'Irrational numbers cannot be expressed as p/q where p, q are integers.', relatedTopics: ['Real Numbers', 'Rational Numbers'], applicationExample: 'The diagonal of a unit square is √2, an irrational number.' },
+  },
+  // CLASS 9 - Biology
+  {
+    id: 'b-9-1', subject: 'biology', topic: 'Cell Biology', classLevel: 9,
+    examType: ['NEET', 'other'], question: 'The basic structural and functional unit of life is:',
+    options: ['Cell', 'Tissue', 'Organ', 'Atom'], correctAnswer: 0,
+    hint: 'Robert Hooke first observed it in cork slices.',
+    solution: 'The cell is the basic unit of life. All living organisms are composed of one or more cells.',
+    reference: { theory: 'Cell theory states all living things are made of cells.', relatedTopics: ['Cell Theory', 'Prokaryotic vs Eukaryotic'], applicationExample: 'Red blood cells carry oxygen throughout the body.' },
+  },
 ];
 
 export const getQuestionsBySubject = (subject: Subject): Question[] =>
@@ -241,8 +277,6 @@ export const getQuestionsByClass = (classLevel: number): Question[] =>
 
 export const getQuestionsByExam = (examType: string): Question[] =>
   questions.filter((q) => q.examType.includes(examType as any));
-
-import { Subject } from '@/types';
 
 export const getRandomQuestions = (
   subjects: Subject[],
