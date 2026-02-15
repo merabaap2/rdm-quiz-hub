@@ -14,16 +14,232 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      classroom_members: {
+        Row: {
+          classroom_id: string
+          google_synced: boolean
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          classroom_id: string
+          google_synced?: boolean
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          classroom_id?: string
+          google_synced?: boolean
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classroom_members_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classroom_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classrooms: {
+        Row: {
+          created_at: string
+          description: string | null
+          google_classroom_id: string | null
+          id: string
+          invite_link: string | null
+          join_code: string
+          name: string
+          section: string | null
+          subject: string | null
+          teacher_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          google_classroom_id?: string | null
+          id?: string
+          invite_link?: string | null
+          join_code?: string
+          name: string
+          section?: string | null
+          subject?: string | null
+          teacher_id: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          google_classroom_id?: string | null
+          id?: string
+          invite_link?: string | null
+          join_code?: string
+          name?: string
+          section?: string | null
+          subject?: string | null
+          teacher_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classrooms_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          action_url: string | null
+          body: string | null
+          created_at: string
+          id: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          class_level: number | null
+          created_at: string
+          exam_tags: string[] | null
+          google_connected: boolean
+          id: string
+          name: string
+          onboarding_complete: boolean
+          role: string
+          stream: string | null
+          subject_combo: string | null
+          subjects: string[] | null
+          teaching_levels: number[] | null
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          class_level?: number | null
+          created_at?: string
+          exam_tags?: string[] | null
+          google_connected?: boolean
+          id: string
+          name?: string
+          onboarding_complete?: boolean
+          role?: string
+          stream?: string | null
+          subject_combo?: string | null
+          subjects?: string[] | null
+          teaching_levels?: number[] | null
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          class_level?: number | null
+          created_at?: string
+          exam_tags?: string[] | null
+          google_connected?: boolean
+          id?: string
+          name?: string
+          onboarding_complete?: boolean
+          role?: string
+          stream?: string | null
+          subject_combo?: string | null
+          subjects?: string[] | null
+          teaching_levels?: number[] | null
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "teacher" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +366,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "teacher", "student"],
+    },
   },
 } as const

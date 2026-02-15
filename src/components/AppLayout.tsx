@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { useUserStore } from '@/store/useUserStore';
-import { LayoutDashboard, Crosshair, Compass, BookMarked, User, Coins, Settings, Crown } from 'lucide-react';
+import { LayoutDashboard, Crosshair, Compass, BookMarked, User, Coins, Settings, Crown, School } from 'lucide-react';
 import StreakTimer from '@/components/StreakTimer';
 import BreakScreen from '@/components/BreakScreen';
 import RecallExercise from '@/components/RecallExercise';
@@ -12,20 +13,22 @@ interface AppLayoutProps {
   streakTimer?: ReturnType<typeof useStreakTimer>;
 }
 
-const navItems = [
+const baseNavItems = [
   { path: '/home', icon: LayoutDashboard, label: 'Dashboard', emoji: '📊' },
   { path: '/play', icon: Crosshair, label: 'Play', emoji: '🔥' },
   { path: '/explore', icon: Compass, label: 'Explore', emoji: '🧭' },
+  { path: '/classrooms', icon: School, label: 'Classes', emoji: '🏫' },
   { path: '/revision', icon: BookMarked, label: 'Revision', emoji: '📚' },
-  { path: '/pricing', icon: Crown, label: 'Plans', emoji: '👑' },
   { path: '/profile', icon: User, label: 'Profile', emoji: '👤' },
 ];
 
 const AppLayout = ({ children, streakTimer }: AppLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { profile, signOut } = useAuth();
   const user = useUserStore((s) => s.user);
   const allResults = useUserStore((s) => s.allResults);
+  const navItems = baseNavItems;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
