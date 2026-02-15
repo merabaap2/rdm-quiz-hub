@@ -1,247 +1,165 @@
 
 
-# Education Social Media Platform - Google Classroom + Meet Integration
+# Phase 2-4 Implementation: Content, Live Sessions, and Enhanced Classroom Flows
 
-## Scope Assessment
+## Current State Assessment
 
-The current EduBlast app is a **client-side only quiz app** with no backend, no authentication, and no database. The requested feature set requires building an entirely new platform layer on top of it. This plan covers the **complete roadmap** broken into implementable phases.
+**Already built (Phase 1):**
+- Database tables: `profiles`, `user_roles`, `classrooms`, `classroom_members`, `notifications`
+- Auth: Google OAuth + email sign-in, onboarding with role selection (student/teacher)
+- Classrooms: basic create, list, join by 6-digit code, member list view
+- Navigation: role-aware with Classes tab
 
----
+**Missing from the detailed flows you shared:**
 
-## Phase 1: Foundation (Must be done first)
+| Flow | Status | Key Gaps |
+|------|--------|----------|
+| Flow 0 - Google connect checklist | Not built | Checklist screen before OAuth |
+| Flow 1 - Teacher onboarding | Partial | Missing: teaching levels picker, exam tags, visibility, verification upload |
+| Flow 2 - Create class (Google-linked) | Not built | Missing: "Link with Google Classroom" option, create/link existing course |
+| Flow 3 - Invite students | Minimal | Missing: search users, share link method, CSV import, branching join UX |
+| Flow 4 - Post content | Not built | Missing: posts table, post composer, content types, class feed |
+| Flow 5 - Live lectures | Not built | Missing: live_sessions table, scheduling, attendance, Meet integration |
+| Flow 6 - Weekly cycle | Not built | Missing: teacher analytics dashboard |
+| Flow 7 - Fallback handling | Not built | Missing: error states, manual alternatives |
 
-### 1A. Enable Supabase (Lovable Cloud)
-- Set up Lovable Cloud backend for database, auth, and edge functions
-- This provides PostgreSQL, authentication, and serverless functions
-
-### 1B. Database Schema
-Create the following tables:
-
-```text
-profiles
-  - id (uuid, FK to auth.users)
-  - name, class_level, stream, subject_combo
-  - role: 'student' | 'teacher'
-  - avatar_url, bio
-  - teaching_levels, subjects, exam_tags (for teachers)
-  - visibility: 'public' | 'invite_only'
-  - google_connected (boolean)
-  - created_at
-
-user_roles (separate table per security rules)
-  - user_id, role (app_role enum: admin, teacher, student)
-
-classrooms
-  - id, teacher_id (FK profiles)
-  - name, section, subject, description
-  - type: 'esm_only' | 'google_linked'
-  - google_classroom_id (nullable)
-  - join_code (6-digit)
-  - invite_link
-  - created_at
-
-classroom_members
-  - classroom_id, user_id
-  - role: 'teacher' | 'student'
-  - google_synced (boolean)
-  - joined_at
-
-posts
-  - id, classroom_id, teacher_id
-  - type: 'concept' | 'video' | 'quiz' | 'assignment' | 'poll' | 'announcement'
-  - title, description, content_json
-  - tags (topic, exam, difficulty)
-  - visibility: 'class_only' | 'public'
-  - due_date
-  - google_classroom_synced (boolean)
-  - created_at
-
-live_sessions
-  - id, classroom_id, teacher_id
-  - title, scheduled_at, duration_minutes
-  - meet_link, attendance_code
-  - status: 'scheduled' | 'live' | 'completed'
-  - recording_url, recap_post_id
-  - created_at
-
-session_attendance
-  - session_id, user_id, checked_in_at
-
-notifications
-  - id, user_id, type, title, body
-  - action_url, read (boolean)
-  - created_at
-```
-
-### 1C. Authentication
-- Google OAuth sign-in (primary method)
-- Email/password fallback
-- Role selection during onboarding (Student vs Teacher)
-- Profile auto-creation via database trigger
+**Missing database tables:** `posts`, `live_sessions`, `session_attendance`
 
 ---
 
-## Phase 2: Teacher Onboarding + Classroom System (Flows 0-2)
+## What This Implementation Covers
 
-### 2A. Teacher Profile Setup Page
-- After Google sign-in, if role = teacher, show profile setup
-- Fields: teaching levels, subjects, exam tags, languages, visibility
-- Optional: verification upload (stored in Supabase Storage)
-
-### 2B. Classroom Management
-- "My Classrooms" dashboard for teachers
-- Create Classroom flow:
-  - ESM-only: create directly in database
-  - Google-linked: uses Google Classroom API via edge function
-- Classroom settings page (edit name, manage members, toggle Google sync)
-
-### 2C. Google Classroom API Integration
-- Edge function: `google-classroom` that proxies Classroom API calls
-- Requires teacher's Google OAuth token (stored securely)
-- Operations: create course, list courses, link existing course, sync roster
-- Scopes needed: `classroom.courses`, `classroom.rosters`, `classroom.coursework`
+Given the scope, this session will build **Flows 0-4** (the core classroom + content experience), leaving Meet integration (Flow 5) and Analytics (Flow 6) for a follow-up.
 
 ---
 
-## Phase 3: Student Join Experience (Flow 3)
+## Step 1: Database Migration -- Add Missing Tables
 
-### 3A. Join Methods
-- Direct invite from ESM (search users, send notification)
-- Share join link: `/join/:classId` with optional access code
-- Bulk invite via CSV/email list
+Add three new tables:
 
-### 3B. Student Join Page
-- `/join/:classId` route
-- Shows classroom info (name, teacher, subject)
-- "Join with Google" or "Join ESM-only" branching
-- If Google-linked: attempt Classroom enrollment via API
-- Fallback: join ESM community only with instructions for manual Classroom join
+**posts** -- stores all classroom content (concepts, videos, quizzes, assignments, polls, announcements)
+- id, classroom_id, teacher_id, type, title, description, content_json, tags, visibility, due_date, google_classroom_synced, created_at
 
-### 3C. Notifications System
-- In-app notification bell
-- "You've been invited to join..." notifications
-- Read/unread state
+**live_sessions** -- stores scheduled/live/completed lectures
+- id, classroom_id, teacher_id, title, scheduled_at, duration_minutes, meet_link, attendance_code, status, recording_url, recap_post_id, created_at
+
+**session_attendance** -- tracks who attended
+- id, session_id, user_id, checked_in_at
+
+All with RLS policies matching existing patterns (teachers manage their own, students view what they're members of).
 
 ---
 
-## Phase 4: Content Posting (Flow 4)
+## Step 2: Enhanced Teacher Onboarding (Flow 0 + Flow 1)
 
-### 4A. Post Composer
-- Rich post creation inside a classroom
-- Content types: Concept Post, Video Lesson, Quiz, Assignment, Poll, Announcement
-- Tag system: chapter/topic/exam/difficulty (reuses existing taxonomy)
-- Visibility control
+**Update `Onboarding.tsx`** to add richer teacher profile setup:
+- Teaching levels multi-select: School / UG / PG / Competitive / International
+- Exam tags multi-select: JEE / NEET / GRE / GMAT / SAT / TOEFL
+- Visibility toggle: Public / Invite-only
+- Language selection
+- Optional verification note (text field; file upload deferred)
 
-### 4B. Google Classroom Sync
-- "Also publish to Google Classroom" checkbox
-- Maps content types to Classroom types:
-  - Video/Concept -> Material
-  - Quiz/Assignment -> Assignment with ESM link
-  - Question -> Short answer question
-- Edge function handles Classroom API `coursework.create`
-
-### 4C. Class Feed
-- Students see posts in chronological feed
-- React/comment/ask doubts on posts
-- Links back to ESM quiz engine for practice content
+**New component: `GoogleConnectChecklist`** (Flow 0)
+- Shown when teacher clicks "Connect Google" anywhere
+- Light checklist: Google account ready, admin allows Classroom, understand ESM vs Classroom
+- Buttons: "Continue -> Connect Google" and "Skip (ESM-only)"
 
 ---
 
-## Phase 5: Live Lectures with Google Meet (Flow 5)
+## Step 3: Enhanced Classroom Creation (Flow 2)
 
-### 5A. Schedule Session
-- Create live lecture with title, date/time, duration
-- Audience selection (whole class or subgroup)
-- Auto-create Google Meet link via Calendar/Meet API
-- Post announcement to class feed + optional Classroom
-
-### 5B. Live Session Experience
-- "Join Live" button linking to Meet
-- Attendance tracking (check-in button + optional 4-digit code)
-- In-session: quick polls, doubt queue (stored in database)
-
-### 5C. Post-Session Workflow
-- Upload recording link, slides, notes
-- Auto-generate recap post
-- Create practice set from session topic
-- Streak credit for attendees
+**Update `Classrooms.tsx` create dialog** to support:
+- Step 1: Choose type -- "Link with Google Classroom (Recommended)" vs "ESM-only Classroom"
+- Step 2 (ESM-only): Current form (name, subject, section) + description + auto-create ESM community
+- Step 2 (Google-linked): Placeholder UI showing "Create new course" or "Link existing course" with a note that Google API integration requires credentials setup
+- Toggle: "Also create ESM Community space" (checked by default)
 
 ---
 
-## Phase 6: Weekly Cycle + Analytics (Flows 6-7)
+## Step 4: Enhanced Invite + Join Experience (Flow 3)
 
-### 6A. Teacher Analytics Dashboard
-- Weekly plan view
-- Student engagement metrics
-- "Students who slipped" nudge list
-- Weak topics cluster insights
+**Update `ClassroomDetail.tsx`** Members tab with invite methods:
+- Method 1: Search ESM users by name (query `profiles` table)
+- Method 2: Share join link (`/join/<classId>`) with copy button
+- Method 3: Bulk invite placeholder (CSV upload UI, functional later)
 
-### 6B. Fallback Handling
-- Graceful degradation when Google APIs fail
-- Manual Meet link entry
-- "Continue in ESM" always available
-- Copy-paste admin request templates for school domain restrictions
-
----
-
-## What Gets Built in THIS Implementation Session
-
-Given the massive scope, this session will implement **Phase 1 (Foundation)** which is the prerequisite for everything else:
-
-1. **Enable Lovable Cloud** (Supabase backend)
-2. **Database schema** -- all tables listed above with RLS policies
-3. **Google OAuth authentication** with role selection
-4. **Profile creation** (student + teacher flows)
-5. **Basic classroom CRUD** (create, list, join via code)
-6. **Updated navigation** -- teacher vs student views
-7. **Classroom dashboard page** for teachers
-
-### New Pages
-- `/auth` -- Login/Signup with Google + email
-- `/onboarding` -- Role selection + profile setup
-- `/classrooms` -- Teacher's classroom list
-- `/classroom/:id` -- Single classroom view (members, posts placeholder)
-- `/join/:classId` -- Student join page
-
-### New Components
-- `AuthGuard` -- replaces current simple check, uses Supabase session
-- `RoleGuard` -- restricts teacher-only pages
-- `ClassroomCard` -- displays classroom info
-- `CreateClassroomDialog` -- form for new classroom
-
-### Modified Files
-- `src/App.tsx` -- new routes, Supabase auth provider
-- `src/components/AppLayout.tsx` -- role-aware navigation
-- `src/store/useUserStore.ts` -- sync with Supabase profile instead of local-only
-
-### Edge Functions
-- `google-classroom` -- proxy for Classroom API (created but Google integration configured in Phase 2)
-
-### Database Migrations
-- Full schema creation with RLS policies
-- Profile trigger on auth signup
-- User roles table (per security requirements)
+**Update `JoinClassroom.tsx`** with branching:
+- Step A: "Continue with Google" or "Continue with Email (ESM-only)"
+- If Google + classroom is Google-linked: show "Joined ESM + Classroom pending" message
+- If domain blocks: show fallback with "Join ESM Only" + "View Classroom Code" + admin request template
+- If ESM-only: instant join with "connect Google later" note
 
 ---
 
-## Prerequisites from You
+## Step 5: Content Posting System (Flow 4)
 
-Before implementation can begin:
-1. **Google Cloud Console setup**: Create a project, enable Classroom API, create OAuth credentials. (Detailed instructions will be provided after Supabase is connected.)
-2. **Decide on domain**: The OAuth redirect URL needs your app's domain.
+**New component: `PostComposer.tsx`**
+- Content type selector: Concept Post, Video Lesson, Quiz, Assignment, Poll, Announcement
+- Common fields: title, description, tags (chapter/topic/exam/difficulty using existing taxonomy), visibility, due date
+- "Publish destinations" checkboxes: ESM Class Feed (checked) + Google Classroom (with mapping options)
+- Publish button
+
+**New component: `ClassFeed.tsx`**
+- Chronological post list inside classroom
+- Each post card shows type icon, title, description, tags, timestamp
+- React/comment placeholder (thumbs up count for now)
+
+**Update `ClassroomDetail.tsx`** to add tabbed layout:
+- Tabs: Home | Posts | Live | Members | Settings
+- Home: classroom overview + recent posts
+- Posts: full feed + compose button (teacher only)
+- Live: placeholder for Phase 5
+- Members: existing member list + invite methods
+- Settings: classroom settings (teacher only)
 
 ---
 
-## Summary
+## Step 6: Notification Bell + In-App Notifications
 
-| Phase | What | Depends On |
-|-------|------|------------|
-| 1 | Supabase + Auth + DB + Basic Classrooms | Nothing |
-| 2 | Teacher onboarding + Google Classroom API | Phase 1 + Google Cloud setup |
-| 3 | Student join flows + Notifications | Phase 1 |
-| 4 | Content posting + Classroom sync | Phase 2 |
-| 5 | Live lectures + Meet integration | Phase 2 + Meet API |
-| 6 | Analytics + Weekly cycle + Fallbacks | Phases 3-5 |
+**New component: `NotificationBell.tsx`**
+- Bell icon in AppLayout header with unread count badge
+- Dropdown showing recent notifications
+- Mark as read on click
+- Links to action_url
 
-This session focuses on **Phase 1** to establish the foundation. Subsequent phases build on top incrementally.
+---
+
+## Step 7: Fallback Handling (Flow 7)
+
+Throughout all Google-linked flows, add:
+- "Continue in ESM" always available as alternative
+- When Google features are unavailable, show actionable next steps
+- Copy-paste admin request template component for school domain restrictions
+- Manual Meet link entry field in live session creation
+
+---
+
+## Files to Create
+- `src/components/PostComposer.tsx` -- rich post creation form
+- `src/components/ClassFeed.tsx` -- chronological post feed
+- `src/components/NotificationBell.tsx` -- header notification dropdown
+- `src/components/GoogleConnectChecklist.tsx` -- Flow 0 checklist
+- `src/components/InviteStudents.tsx` -- multi-method invite UI
+- `src/components/AdminRequestTemplate.tsx` -- copy-paste template for domain issues
+
+## Files to Modify
+- `src/pages/Onboarding.tsx` -- richer teacher profile fields
+- `src/pages/Classrooms.tsx` -- classroom type selection in create dialog
+- `src/pages/ClassroomDetail.tsx` -- tabbed layout with feed, members, settings
+- `src/pages/JoinClassroom.tsx` -- branching join UX
+- `src/components/AppLayout.tsx` -- add notification bell
+- `src/integrations/supabase/types.ts` -- add posts, live_sessions, session_attendance types
+
+## Database Migration
+- Add `posts`, `live_sessions`, `session_attendance` tables with RLS
+
+---
+
+## What Is NOT Included (Deferred)
+
+- **Google Classroom API calls** -- requires Google Cloud credentials + edge function. The UI will be built with placeholders.
+- **Google Meet auto-creation** -- Flow 5 scheduling UI will be built but Meet API integration deferred.
+- **File uploads** -- teacher verification docs, recording uploads use Supabase Storage (separate setup).
+- **Weekly cycle + analytics** -- Flow 6 deferred to next session.
+- **Real-time features** -- Supabase realtime subscriptions for live doubt queue deferred.
 
