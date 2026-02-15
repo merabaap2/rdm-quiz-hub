@@ -1,118 +1,247 @@
 
 
-# Explore Page: Hierarchical Topic & Subtopic Browser
+# Education Social Media Platform - Google Classroom + Meet Integration
 
-## Overview
-Transform the Explore page from a simple filter-and-go interface into a **drill-down topic browser**. When a student clicks a subject (e.g., Physics), they see topics organized by class, with expandable subtopics -- matching the comprehensive syllabus taxonomy provided.
+## Scope Assessment
 
-## Current Problem
-Right now, clicking Physics just highlights the card. Students then click "Find Questions" and get a random mix. There's no way to browse by topic or subtopic.
+The current EduBlast app is a **client-side only quiz app** with no backend, no authentication, and no database. The requested feature set requires building an entirely new platform layer on top of it. This plan covers the **complete roadmap** broken into implementable phases.
 
-## New User Flow
+---
+
+## Phase 1: Foundation (Must be done first)
+
+### 1A. Enable Supabase (Lovable Cloud)
+- Set up Lovable Cloud backend for database, auth, and edge functions
+- This provides PostgreSQL, authentication, and serverless functions
+
+### 1B. Database Schema
+Create the following tables:
 
 ```text
-Step 1: Select Subject
-  [Physics]  [Chemistry]  [Math]  [Biology]
+profiles
+  - id (uuid, FK to auth.users)
+  - name, class_level, stream, subject_combo
+  - role: 'student' | 'teacher'
+  - avatar_url, bio
+  - teaching_levels, subjects, exam_tags (for teachers)
+  - visibility: 'public' | 'invite_only'
+  - google_connected (boolean)
+  - created_at
 
-Step 2: See Topics by Class (accordion/expandable sections)
-  Class 9
-    > Motion (8 questions)
-        - Distance & Displacement
-        - Uniform & Non-Uniform Motion
-        - Equations of Motion
-        - Uniform Circular Motion
-    > Force and Laws of Motion (5 questions)
-        - Newton's Three Laws
-        - Inertia and Mass
-        - Conservation of Momentum
-    > Gravitation ...
-    > Work and Energy ...
-    > Sound ...
+user_roles (separate table per security rules)
+  - user_id, role (app_role enum: admin, teacher, student)
 
-  Class 10
-    > Light: Reflection and Refraction ...
-    > Electricity ...
-    ...
+classrooms
+  - id, teacher_id (FK profiles)
+  - name, section, subject, description
+  - type: 'esm_only' | 'google_linked'
+  - google_classroom_id (nullable)
+  - join_code (6-digit)
+  - invite_link
+  - created_at
 
-  Class 11
-    > Units and Measurements ...
-    > Kinematics ...
-    ...
+classroom_members
+  - classroom_id, user_id
+  - role: 'teacher' | 'student'
+  - google_synced (boolean)
+  - joined_at
 
-  Class 12
-    > Electrostatics ...
-    > Current Electricity ...
-    ...
+posts
+  - id, classroom_id, teacher_id
+  - type: 'concept' | 'video' | 'quiz' | 'assignment' | 'poll' | 'announcement'
+  - title, description, content_json
+  - tags (topic, exam, difficulty)
+  - visibility: 'class_only' | 'public'
+  - due_date
+  - google_classroom_synced (boolean)
+  - created_at
 
-Step 3: Click a topic -> filtered questions for that topic start
+live_sessions
+  - id, classroom_id, teacher_id
+  - title, scheduled_at, duration_minutes
+  - meet_link, attendance_code
+  - status: 'scheduled' | 'live' | 'completed'
+  - recording_url, recap_post_id
+  - created_at
+
+session_attendance
+  - session_id, user_id, checked_in_at
+
+notifications
+  - id, user_id, type, title, body
+  - action_url, read (boolean)
+  - created_at
 ```
 
-## What Gets Built
+### 1C. Authentication
+- Google OAuth sign-in (primary method)
+- Email/password fallback
+- Role selection during onboarding (Student vs Teacher)
+- Profile auto-creation via database trigger
 
-### 1. Topic Taxonomy Data File (`src/data/topicTaxonomy.ts`)
-A new data file containing the full hierarchical syllabus for all 4 subjects. Each entry has:
-- Subject, Class, Topic name, Subtopics array, and exam relevance tags
+---
 
-**Physics** (Classes 9-12): Motion, Force & Laws, Gravitation, Work & Energy, Sound, Light, Electricity, Magnetic Effects, Sources of Energy, Units & Measurements, Kinematics, Laws of Motion, Work-Energy-Power, Rotational Motion, Gravitation (advanced), Properties of Bulk Matter, Thermodynamics, Kinetic Theory, Oscillations & Waves, Electrostatics, Current Electricity, Magnetism, EMI & AC, EM Waves, Optics, Dual Nature, Atoms & Nuclei, Semiconductors
+## Phase 2: Teacher Onboarding + Classroom System (Flows 0-2)
 
-**Chemistry** (Classes 9-12): Matter, Atoms & Molecules, Structure of Atom, Chemical Reactions, Acids-Bases-Salts, Metals & Non-metals, Carbon Compounds, Periodic Table, Atomic Structure, Chemical Bonding, States of Matter, Thermodynamics, Equilibrium, Organic Chemistry, Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, p-Block Elements, Coordination Compounds
+### 2A. Teacher Profile Setup Page
+- After Google sign-in, if role = teacher, show profile setup
+- Fields: teaching levels, subjects, exam tags, languages, visibility
+- Optional: verification upload (stored in Supabase Storage)
 
-**Math** (Classes 9-12): Number Systems, Polynomials, Coordinate Geometry, Linear Equations, Triangles, Statistics, Real Numbers, Quadratic Equations, Arithmetic Progressions, Trigonometry, Sets, Relations & Functions, Trigonometric Functions, Complex Numbers, Sequences & Series, Straight Lines, Probability, Inverse Trig, Matrices, Determinants, Continuity & Differentiability, Integrals, Vectors
+### 2B. Classroom Management
+- "My Classrooms" dashboard for teachers
+- Create Classroom flow:
+  - ESM-only: create directly in database
+  - Google-linked: uses Google Classroom API via edge function
+- Classroom settings page (edit name, manage members, toggle Google sync)
 
-**Biology** (Classes 9-12): Cell Biology, Tissues, Diversity in Living Organisms, Disease & Health, Life Processes, Control & Coordination, Reproduction, Heredity & Evolution, Structural Organization, Biomolecules, Plant Physiology, Human Physiology, Genetics & Molecular Biology, Evolution, Biotechnology, Ecology
+### 2C. Google Classroom API Integration
+- Edge function: `google-classroom` that proxies Classroom API calls
+- Requires teacher's Google OAuth token (stored securely)
+- Operations: create course, list courses, link existing course, sync roster
+- Scopes needed: `classroom.courses`, `classroom.rosters`, `classroom.coursework`
 
-### 2. Redesigned Explore Page (`src/pages/Explore.tsx`)
-The page will have 3 views:
+---
 
-**View 1 -- Subject Selection** (current, polished)
-- 4 subject cards with emoji, gradient, and question count
-- Exam type filter chips (JEE, NEET, KCET, Other)
+## Phase 3: Student Join Experience (Flow 3)
 
-**View 2 -- Topic Browser** (NEW)
-- Shown after selecting a subject
-- Back button to return to subjects
-- Topics grouped under Class headers (Class 9, 10, 11, 12)
-- Each class section is collapsible (using Accordion component)
-- Each topic shows: name, question count badge, subtopics as small chips
-- Clicking a topic filters questions and starts the question flow
-- Class sections filtered based on user's class level
+### 3A. Join Methods
+- Direct invite from ESM (search users, send notification)
+- Share join link: `/join/:classId` with optional access code
+- Bulk invite via CSV/email list
 
-**View 3 -- Question Flow** (existing, unchanged)
-- Shows filtered questions one by one with QuestionCard
+### 3B. Student Join Page
+- `/join/:classId` route
+- Shows classroom info (name, teacher, subject)
+- "Join with Google" or "Join ESM-only" branching
+- If Google-linked: attempt Classroom enrollment via API
+- Fallback: join ESM community only with instructions for manual Classroom join
 
-### 3. No Changes to Question Files
-The existing questions already have `topic` fields that match the taxonomy. The taxonomy data serves as the browsing structure -- questions are filtered by matching `q.topic` and `q.subject`.
+### 3C. Notifications System
+- In-app notification bell
+- "You've been invited to join..." notifications
+- Read/unread state
 
-## Technical Details
+---
 
-### New File
-- `src/data/topicTaxonomy.ts` -- Contains the `TopicNode` interface and full taxonomy array
+## Phase 4: Content Posting (Flow 4)
 
-### Modified File
-- `src/pages/Explore.tsx` -- Add topic browser view between subject selection and question flow
+### 4A. Post Composer
+- Rich post creation inside a classroom
+- Content types: Concept Post, Video Lesson, Quiz, Assignment, Poll, Announcement
+- Tag system: chapter/topic/exam/difficulty (reuses existing taxonomy)
+- Visibility control
 
-### Data Structure
-```text
-interface SubTopic {
-  name: string;
-}
+### 4B. Google Classroom Sync
+- "Also publish to Google Classroom" checkbox
+- Maps content types to Classroom types:
+  - Video/Concept -> Material
+  - Quiz/Assignment -> Assignment with ESM link
+  - Question -> Short answer question
+- Edge function handles Classroom API `coursework.create`
 
-interface TopicNode {
-  subject: Subject;
-  classLevel: ClassLevel;
-  topic: string;           // matches Question.topic field
-  subtopics: SubTopic[];
-  examRelevance: ExamType[];  // which exams focus on this topic
-}
-```
+### 4C. Class Feed
+- Students see posts in chronological feed
+- React/comment/ask doubts on posts
+- Links back to ESM quiz engine for practice content
 
-### Filtering Logic
-- When user clicks a topic, filter: `questions.filter(q => q.subject === subject && q.topic === topic)`
-- Question count badges are computed dynamically from the actual question database
-- Topics with 0 questions still show (grayed out with "Coming soon" badge) so students see the full syllabus
+---
 
-### Components Used
-- `Accordion` (already installed via radix) for collapsible class sections
-- `motion` from framer-motion for animations
-- Existing `QuestionCard` for the question flow
+## Phase 5: Live Lectures with Google Meet (Flow 5)
+
+### 5A. Schedule Session
+- Create live lecture with title, date/time, duration
+- Audience selection (whole class or subgroup)
+- Auto-create Google Meet link via Calendar/Meet API
+- Post announcement to class feed + optional Classroom
+
+### 5B. Live Session Experience
+- "Join Live" button linking to Meet
+- Attendance tracking (check-in button + optional 4-digit code)
+- In-session: quick polls, doubt queue (stored in database)
+
+### 5C. Post-Session Workflow
+- Upload recording link, slides, notes
+- Auto-generate recap post
+- Create practice set from session topic
+- Streak credit for attendees
+
+---
+
+## Phase 6: Weekly Cycle + Analytics (Flows 6-7)
+
+### 6A. Teacher Analytics Dashboard
+- Weekly plan view
+- Student engagement metrics
+- "Students who slipped" nudge list
+- Weak topics cluster insights
+
+### 6B. Fallback Handling
+- Graceful degradation when Google APIs fail
+- Manual Meet link entry
+- "Continue in ESM" always available
+- Copy-paste admin request templates for school domain restrictions
+
+---
+
+## What Gets Built in THIS Implementation Session
+
+Given the massive scope, this session will implement **Phase 1 (Foundation)** which is the prerequisite for everything else:
+
+1. **Enable Lovable Cloud** (Supabase backend)
+2. **Database schema** -- all tables listed above with RLS policies
+3. **Google OAuth authentication** with role selection
+4. **Profile creation** (student + teacher flows)
+5. **Basic classroom CRUD** (create, list, join via code)
+6. **Updated navigation** -- teacher vs student views
+7. **Classroom dashboard page** for teachers
+
+### New Pages
+- `/auth` -- Login/Signup with Google + email
+- `/onboarding` -- Role selection + profile setup
+- `/classrooms` -- Teacher's classroom list
+- `/classroom/:id` -- Single classroom view (members, posts placeholder)
+- `/join/:classId` -- Student join page
+
+### New Components
+- `AuthGuard` -- replaces current simple check, uses Supabase session
+- `RoleGuard` -- restricts teacher-only pages
+- `ClassroomCard` -- displays classroom info
+- `CreateClassroomDialog` -- form for new classroom
+
+### Modified Files
+- `src/App.tsx` -- new routes, Supabase auth provider
+- `src/components/AppLayout.tsx` -- role-aware navigation
+- `src/store/useUserStore.ts` -- sync with Supabase profile instead of local-only
+
+### Edge Functions
+- `google-classroom` -- proxy for Classroom API (created but Google integration configured in Phase 2)
+
+### Database Migrations
+- Full schema creation with RLS policies
+- Profile trigger on auth signup
+- User roles table (per security requirements)
+
+---
+
+## Prerequisites from You
+
+Before implementation can begin:
+1. **Google Cloud Console setup**: Create a project, enable Classroom API, create OAuth credentials. (Detailed instructions will be provided after Supabase is connected.)
+2. **Decide on domain**: The OAuth redirect URL needs your app's domain.
+
+---
+
+## Summary
+
+| Phase | What | Depends On |
+|-------|------|------------|
+| 1 | Supabase + Auth + DB + Basic Classrooms | Nothing |
+| 2 | Teacher onboarding + Google Classroom API | Phase 1 + Google Cloud setup |
+| 3 | Student join flows + Notifications | Phase 1 |
+| 4 | Content posting + Classroom sync | Phase 2 |
+| 5 | Live lectures + Meet integration | Phase 2 + Meet API |
+| 6 | Analytics + Weekly cycle + Fallbacks | Phases 3-5 |
+
+This session focuses on **Phase 1** to establish the foundation. Subsequent phases build on top incrementally.
 
