@@ -125,7 +125,7 @@ const Classrooms = () => {
                 <DialogContent className="rounded-2xl">
                   <DialogHeader><DialogTitle className="font-display">Join a Classroom</DialogTitle></DialogHeader>
                   <div className="space-y-4 mt-2">
-                    <Input placeholder="Enter 6-digit join code" value={joinCode} onChange={e => setJoinCode(e.target.value)} className="rounded-xl h-12 text-center text-lg tracking-widest font-bold" maxLength={6} />
+                    <Input placeholder="Enter 8-character join code" value={joinCode} onChange={e => setJoinCode(e.target.value)} className="rounded-xl h-12 text-center text-lg tracking-widest font-bold" maxLength={8} />
                     <Button onClick={handleJoin} className="w-full rounded-xl edu-btn-primary h-12 font-extrabold">Join 🚀</Button>
                   </div>
                 </DialogContent>
