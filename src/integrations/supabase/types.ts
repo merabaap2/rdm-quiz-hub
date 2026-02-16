@@ -403,6 +403,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_classroom_member: {
+        Args: { _classroom_id: string; _user_id: string }
+        Returns: boolean
+      }
+      users_share_classroom: {
+        Args: { _other_user_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "teacher" | "student"
