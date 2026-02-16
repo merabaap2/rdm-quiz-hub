@@ -109,6 +109,73 @@ export type Database = {
           },
         ]
       }
+      live_sessions: {
+        Row: {
+          attendance_code: string | null
+          classroom_id: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          meet_link: string | null
+          recap_post_id: string | null
+          recording_url: string | null
+          scheduled_at: string
+          status: string
+          teacher_id: string
+          title: string
+        }
+        Insert: {
+          attendance_code?: string | null
+          classroom_id: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          meet_link?: string | null
+          recap_post_id?: string | null
+          recording_url?: string | null
+          scheduled_at: string
+          status?: string
+          teacher_id: string
+          title: string
+        }
+        Update: {
+          attendance_code?: string | null
+          classroom_id?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          meet_link?: string | null
+          recap_post_id?: string | null
+          recording_url?: string | null
+          scheduled_at?: string
+          status?: string
+          teacher_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_sessions_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_sessions_recap_post_id_fkey"
+            columns: ["recap_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_sessions_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -144,6 +211,69 @@ export type Database = {
           {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          classroom_id: string
+          content_json: Json | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          google_classroom_synced: boolean
+          id: string
+          tags: string[] | null
+          teacher_id: string
+          title: string
+          type: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          classroom_id: string
+          content_json?: Json | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          google_classroom_synced?: boolean
+          id?: string
+          tags?: string[] | null
+          teacher_id: string
+          title: string
+          type?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          classroom_id?: string
+          content_json?: Json | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          google_classroom_synced?: boolean
+          id?: string
+          tags?: string[] | null
+          teacher_id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_teacher_id_fkey"
+            columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -206,6 +336,42 @@ export type Database = {
           visibility?: string
         }
         Relationships: []
+      }
+      session_attendance: {
+        Row: {
+          checked_in_at: string
+          id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          id?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          checked_in_at?: string
+          id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_attendance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

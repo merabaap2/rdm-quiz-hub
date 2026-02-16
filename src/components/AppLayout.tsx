@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserStore } from '@/store/useUserStore';
 import { LayoutDashboard, Crosshair, Compass, BookMarked, User, Coins, Settings, Crown, School } from 'lucide-react';
 import StreakTimer from '@/components/StreakTimer';
+import NotificationBell from '@/components/NotificationBell';
 import BreakScreen from '@/components/BreakScreen';
 import RecallExercise from '@/components/RecallExercise';
 import { useStreakTimer } from '@/hooks/useStreakTimer';
@@ -83,6 +84,7 @@ const AppLayout = ({ children, streakTimer }: AppLayoutProps) => {
                 <span className="text-xs text-muted-foreground hidden sm:inline font-bold">RDM</span>
               </button>
             )}
+            <NotificationBell />
             <button
               onClick={() => navigate('/profile')}
               className="w-9 h-9 rounded-xl bg-muted/60 hover:bg-muted flex items-center justify-center transition-colors"
