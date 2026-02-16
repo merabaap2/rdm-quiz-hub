@@ -28,6 +28,26 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Welcome />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/home" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/play" element={<ProtectedRoute><Play /></ProtectedRoute>} />
+      <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
+      <Route path="/revision" element={<ProtectedRoute><Revision /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+      <Route path="/classrooms" element={<ProtectedRoute><Classrooms /></ProtectedRoute>} />
+      <Route path="/classroom/:id" element={<ProtectedRoute><ClassroomDetail /></ProtectedRoute>} />
+      <Route path="/join/:classId" element={<JoinClassroom />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -35,21 +55,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Welcome />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/home" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/play" element={<ProtectedRoute><Play /></ProtectedRoute>} />
-            <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
-            <Route path="/revision" element={<ProtectedRoute><Revision /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
-            <Route path="/classrooms" element={<ProtectedRoute><Classrooms /></ProtectedRoute>} />
-            <Route path="/classroom/:id" element={<ProtectedRoute><ClassroomDetail /></ProtectedRoute>} />
-            <Route path="/join/:classId" element={<JoinClassroom />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppRoutes />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
