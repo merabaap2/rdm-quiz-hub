@@ -19,10 +19,21 @@ const InviteStudents = ({ classroomId, joinCode }: Props) => {
   const joinLink = `${window.location.origin}/join/${classroomId}`;
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
+    const query = searchQuery.trim();
+    if (!query) return;
+    if (query.length < 2 || query.length > 50) {
+      toast({ title: 'Search must be 2-50 characters' });
+      return;
+    }
+    if (!/^[a-zA-Z0-9\s'\-\.]+$/.test(query)) {
+      toast({ title: 'Invalid search characters' });
+      return;
+    }
     setSearching(true);
     const { data } = await supabase.from('profiles').select('id, name')
-      .ilike('name', `%${searchQuery.trim()}%`).limit(10);
+      .ilike('name', `%${query}%`)
+      .neq('visibility', 'invite_only')
+      .limit(10);
     setSearchResults((data as { id: string; name: string }[]) || []);
     setSearching(false);
   };
@@ -43,8 +54,9 @@ const InviteStudents = ({ classroomId, joinCode }: Props) => {
       {/* Method 1: Search */}
       <div>
         <h4 className="text-sm font-extrabold text-foreground mb-2 flex items-center gap-1.5">
-          <Search className="w-4 h-4 text-primary" /> Search ESM Users
+          <Search className="w-4 h-4 text-primary" /> Search Users
         </h4>
+        <p className="text-xs text-muted-foreground mb-2">Search among users in your classroom network</p>
         <div className="flex gap-2">
           <Input placeholder="Search by name..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()} className="rounded-xl" />
