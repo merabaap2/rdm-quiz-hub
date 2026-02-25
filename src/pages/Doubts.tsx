@@ -1,17 +1,26 @@
 import AppLayout from '@/components/AppLayout';
 import { useState } from 'react';
 import { MessageCircleQuestion, Plus, ChevronUp, ChevronDown, Bookmark, Flame, Trophy } from 'lucide-react';
+import UserProfilePopup from '@/components/UserProfilePopup';
 
 const sampleDoubts = [
-  { id: '1', title: "What is the value of Planck's constant?", description: 'Quantum Physics', subject: 'Physics', resolved: true, upvotes: 0, downvotes: 0, answers: 1, date: '21/02/2026', bounty: 50 },
-  { id: '2', title: 'What is centrifugal force', description: 'I want more context and easy style to understand', subject: 'Physics', resolved: true, upvotes: 1, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 30 },
-  { id: '3', title: 'What is Hemaglobin', description: 'Add context more', subject: 'Biology', resolved: true, upvotes: 0, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 20 },
-  { id: '4', title: 'What is Physics', description: 'General Format', subject: 'Physics', resolved: true, upvotes: 0, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 15 },
-  { id: '5', title: 'Difference between genotype and phenotype', description: 'I understand genotype is the genetic makeup and phenotype is what we see. Can someone give a simple example like pea plants?', subject: 'Biology', resolved: false, upvotes: 1, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 0 },
-  { id: '6', title: 'Best way to balance a redox equation in acidic medium?', description: "I keep getting wrong coefficients for MnO₄⁻ + Fe²⁺ → Mn²⁺ + Fe³⁺. What are the half-reaction steps?", subject: 'Chemistry', resolved: false, upvotes: 0, downvotes: 0, answers: 0, date: '20/02/2026', bounty: 0 },
-  { id: '7', title: 'Why does the normal force do no work when walking?', description: 'My teacher said the normal force is perpendicular to displacement so work is zero. Can someone explain why we still need it?', subject: 'Physics', resolved: false, upvotes: 0, downvotes: 0, answers: 0, date: '20/02/2026', bounty: 0 },
-  { id: '8', title: 'How do I integrate x² eˣ by parts?', description: "I tried u = x² and dv = eˣ dx but the integral gets messy. What's the standard approach?", subject: 'Math', resolved: false, upvotes: 0, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 0 },
+  { id: '1', title: "What is the value of Planck's constant?", description: 'Quantum Physics', subject: 'Physics', resolved: true, upvotes: 0, downvotes: 0, answers: 1, date: '21/02/2026', bounty: 50, authorId: 'sankar-l', authorName: 'Sankar L', authorInitials: 'SL' },
+  { id: '2', title: 'What is centrifugal force', description: 'I want more context and easy style to understand', subject: 'Physics', resolved: true, upvotes: 1, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 30, authorId: 'sankar-l', authorName: 'Sankar L', authorInitials: 'SL' },
+  { id: '3', title: 'What is Hemaglobin', description: 'Add context more', subject: 'Biology', resolved: true, upvotes: 0, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 20, authorId: 'priya-m', authorName: 'Priya M', authorInitials: 'PM' },
+  { id: '4', title: 'What is Physics', description: 'General Format', subject: 'Physics', resolved: true, upvotes: 0, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 15, authorId: 'ravi-t', authorName: 'Ravi T', authorInitials: 'RT' },
+  { id: '5', title: 'Difference between genotype and phenotype', description: 'I understand genotype is the genetic makeup and phenotype is what we see. Can someone give a simple example like pea plants?', subject: 'Biology', resolved: false, upvotes: 1, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 0, authorId: 'priya-m', authorName: 'Priya M', authorInitials: 'PM' },
+  { id: '6', title: 'Best way to balance a redox equation in acidic medium?', description: "I keep getting wrong coefficients for MnO₄⁻ + Fe²⁺ → Mn²⁺ + Fe³⁺. What are the half-reaction steps?", subject: 'Chemistry', resolved: false, upvotes: 0, downvotes: 0, answers: 0, date: '20/02/2026', bounty: 0, authorId: 'deepa-r', authorName: 'Deepa R', authorInitials: 'DR' },
+  { id: '7', title: 'Why does the normal force do no work when walking?', description: 'My teacher said the normal force is perpendicular to displacement so work is zero. Can someone explain why we still need it?', subject: 'Physics', resolved: false, upvotes: 0, downvotes: 0, answers: 0, date: '20/02/2026', bounty: 0, authorId: 'sankar-l', authorName: 'Sankar L', authorInitials: 'SL' },
+  { id: '8', title: 'How do I integrate x² eˣ by parts?', description: "I tried u = x² and dv = eˣ dx but the integral gets messy. What's the standard approach?", subject: 'Math', resolved: false, upvotes: 0, downvotes: 0, answers: 1, date: '20/02/2026', bounty: 0, authorId: 'arjun-k', authorName: 'Arjun K', authorInitials: 'AK' },
 ];
+
+const authorColors: Record<string, string> = {
+  'sankar-l': 'bg-secondary',
+  'priya-m': 'bg-accent',
+  'arjun-k': 'bg-edu-orange',
+  'deepa-r': 'bg-primary',
+  'ravi-t': 'bg-edu-yellow',
+};
 
 const subjectColors: Record<string, string> = {
   Physics: 'bg-secondary/15 text-secondary',
@@ -109,13 +118,29 @@ const Doubts = () => {
                     <span className="text-xs font-bold">{d.upvotes}</span>
                     <button className="hover:text-foreground"><ChevronDown className="w-4 h-4" /></button>
                   </div>
+
+                  {/* Author avatar */}
+                  <UserProfilePopup userId={d.authorId}>
+                    <button className={`w-8 h-8 rounded-full ${authorColors[d.authorId] || 'bg-muted'} flex items-center justify-center text-[10px] font-bold text-primary-foreground shrink-0 cursor-pointer hover:ring-2 hover:ring-secondary/40 transition-all`}>
+                      {d.authorInitials}
+                    </button>
+                  </UserProfilePopup>
+
                   <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <UserProfilePopup userId={d.authorId}>
+                        <button className="text-[11px] font-bold text-foreground hover:text-secondary cursor-pointer transition-colors">
+                          {d.authorName}
+                        </button>
+                      </UserProfilePopup>
+                      <span className="text-[10px] text-muted-foreground">· {d.date}</span>
+                    </div>
                     <h3 className="font-bold text-sm text-foreground truncate">{d.title}</h3>
                     <p className="text-xs text-muted-foreground truncate mt-0.5">{d.description}</p>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
                       <span className={`edu-chip text-[10px] ${subjectColors[d.subject] || 'bg-muted text-muted-foreground'}`}>{d.subject}</span>
                       {d.resolved && <span className="edu-chip text-[10px] bg-accent/15 text-accent">Resolved</span>}
-                      <span className="text-[10px] text-muted-foreground ml-auto">{d.date}</span>
+                      {d.bounty > 0 && <span className="edu-chip text-[10px] bg-edu-orange/15 text-edu-orange font-bold">+{d.bounty} RDM</span>}
                     </div>
                   </div>
                   <button className="text-muted-foreground hover:text-foreground self-start"><Bookmark className="w-4 h-4" /></button>
