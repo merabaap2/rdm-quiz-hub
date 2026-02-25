@@ -14,7 +14,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Search, Filter, ArrowLeft, Sparkles, BookOpen, ChevronRight } from 'lucide-react';
+import { Search, Filter, ArrowLeft, Sparkles, BookOpen, ChevronRight, School } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const subjects: { value: Subject; label: string; emoji: string; gradient: string }[] = [
   { value: 'physics', label: 'Physics', emoji: '⚡', gradient: 'from-blue-500 to-cyan-400' },
@@ -33,6 +34,7 @@ const exams: { value: ExamType; label: string; emoji: string }[] = [
 type ViewState = 'subjects' | 'topics' | 'questions';
 
 const Explore = () => {
+  const navigate = useNavigate();
   const user = useUserStore((s) => s.user);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedExam, setSelectedExam] = useState<ExamType | null>(null);
@@ -171,6 +173,31 @@ const Explore = () => {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Classes Section */}
+            <div className="mb-8">
+              <h3 className="text-sm font-extrabold text-foreground mb-3 flex items-center gap-2">
+                <School className="w-4 h-4 text-primary" /> Classes
+              </h3>
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                onClick={() => navigate('/classrooms')}
+                className="w-full p-5 rounded-2xl text-left transition-all edu-card hover:shadow-lg hover:scale-[1.01] group flex items-center gap-4"
+              >
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <span className="text-2xl">🏫</span>
+                </div>
+                <div className="flex-1">
+                  <span className="font-extrabold text-sm block text-foreground">My Classrooms</span>
+                  <span className="text-xs text-muted-foreground font-bold mt-0.5 block">
+                    Join or manage your classes, view feeds & live sessions
+                  </span>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.button>
             </div>
           </motion.div>
         )}
