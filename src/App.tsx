@@ -16,6 +16,8 @@ import Pricing from "./pages/Pricing";
 import Classrooms from "./pages/Classrooms";
 import ClassroomDetail from "./pages/ClassroomDetail";
 import JoinClassroom from "./pages/JoinClassroom";
+import Mock from "./pages/Mock";
+import Doubts from "./pages/Doubts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,8 @@ const AppRoutes = () => {
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
       <Route path="/classrooms" element={<ProtectedRoute><Classrooms /></ProtectedRoute>} />
+      <Route path="/mock" element={<ProtectedRoute><Mock /></ProtectedRoute>} />
+      <Route path="/doubts" element={<ProtectedRoute><Doubts /></ProtectedRoute>} />
       <Route path="/classroom/:id" element={<ProtectedRoute><ClassroomDetail /></ProtectedRoute>} />
       <Route path="/join/:classId" element={<JoinClassroom />} />
       <Route path="*" element={<NotFound />} />
