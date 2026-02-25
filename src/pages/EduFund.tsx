@@ -36,6 +36,8 @@ const EduFund = () => {
   const { toast } = useToast();
   const [supportingId, setSupportingId] = useState<string | null>(null);
   const [donationAmount, setDonationAmount] = useState('');
+  const [hypes, setHypes] = useState<Record<string, number>>(() => Object.fromEntries(proposals.map(p => [p.id, p.supporters])));
+  const [hypedIds, setHypedIds] = useState<Set<string>>(new Set());
   const [createOpen, setCreateOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newCategory, setNewCategory] = useState('');
@@ -65,6 +67,13 @@ const EduFund = () => {
     toast({ title: 'Thank you! 💛', description: `You donated ₹${amt.toLocaleString('en-IN')} to "${title}".` });
     setSupportingId(null);
     setDonationAmount('');
+  };
+
+  const handleHype = (id: string) => {
+    if (hypedIds.has(id)) return;
+    setHypes(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+    setHypedIds(prev => new Set(prev).add(id));
+    toast({ title: '🔥 Hyped!', description: 'You boosted this proposal\'s visibility.' });
   };
 
   return (
@@ -212,10 +221,22 @@ const EduFund = () => {
                             <Button size="sm" variant="ghost" className="rounded-xl" onClick={() => setSupportingId(null)}>Cancel</Button>
                           </motion.div>
                         ) : (
-                          <motion.div key="btn">
-                            <Button variant="outline" className="gap-2 rounded-xl font-bold w-full" onClick={() => setSupportingId(proposal.id)}>
+                          <motion.div key="btn" className="flex items-center gap-2">
+                            <Button variant="outline" className="gap-2 rounded-xl font-bold flex-1" onClick={() => setSupportingId(proposal.id)}>
                               <Heart className="w-4 h-4 text-destructive" /> Support this student
                             </Button>
+                            <Button
+                              variant={hypedIds.has(proposal.id) ? "default" : "outline"}
+                              size="icon"
+                              className={`rounded-xl shrink-0 ${hypedIds.has(proposal.id) ? 'bg-orange-500 hover:bg-orange-600 text-white border-orange-500' : ''}`}
+                              onClick={() => handleHype(proposal.id)}
+                              title="Hype — boost this proposal's visibility"
+                            >
+                              <Flame className="w-4 h-4" />
+                            </Button>
+                            {(hypes[proposal.id] || 0) > proposal.supporters && (
+                              <span className="text-xs font-bold text-orange-500">{hypes[proposal.id]}</span>
+                            )}
                           </motion.div>
                         )}
                       </AnimatePresence>
