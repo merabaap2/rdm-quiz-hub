@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserStore } from '@/store/useUserStore';
-import { LayoutDashboard, Crosshair, Compass, BookMarked, User, Coins, Settings, Crown, School, ClipboardList, MessageCircleQuestion } from 'lucide-react';
+import { LayoutDashboard, Crosshair, Compass, BookMarked, User, Coins, Settings, Crown, ClipboardList, MessageCircleQuestion } from 'lucide-react';
 import StreakTimer from '@/components/StreakTimer';
 import NotificationBell from '@/components/NotificationBell';
 import BreakScreen from '@/components/BreakScreen';
@@ -18,7 +18,7 @@ const baseNavItems = [
   { path: '/home', icon: LayoutDashboard, label: 'Dashboard', emoji: '📊' },
   { path: '/play', icon: Crosshair, label: 'Play', emoji: '🔥' },
   { path: '/explore', icon: Compass, label: 'Explore', emoji: '🧭' },
-  { path: '/classrooms', icon: School, label: 'Classes', emoji: '🏫' },
+  
   { path: '/mock', icon: ClipboardList, label: 'Mock', emoji: '📝' },
   { path: '/doubts', icon: MessageCircleQuestion, label: 'Doubts', emoji: '❓' },
   { path: '/revision', icon: BookMarked, label: 'Revision', emoji: '📚' },
