@@ -20,6 +20,7 @@ import Mock from "./pages/Mock";
 import Doubts from "./pages/Doubts";
 import PublicProfile from "./pages/PublicProfile";
 import EduFund from "./pages/EduFund";
+import EduFundProposal from "./pages/EduFundProposal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const AppRoutes = () => {
       <Route path="/mock" element={<ProtectedRoute><Mock /></ProtectedRoute>} />
       <Route path="/doubts" element={<ProtectedRoute><Doubts /></ProtectedRoute>} />
       <Route path="/edufund" element={<ProtectedRoute><EduFund /></ProtectedRoute>} />
+      <Route path="/edufund/:id" element={<ProtectedRoute><EduFundProposal /></ProtectedRoute>} />
       <Route path="/classroom/:id" element={<ProtectedRoute><ClassroomDetail /></ProtectedRoute>} />
       <Route path="/join/:classId" element={<JoinClassroom />} />
       <Route path="/user/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
