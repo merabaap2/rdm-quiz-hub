@@ -1,80 +1,80 @@
 
-## Public Profile Popup on Doubts Page
+## Student Support Fund Page ("EduFund")
 
-### What we're building
-When you click on a user's avatar/name on any doubt card, a rich popup appears showing their full public profile -- similar to how LinkedIn or Twitter shows a profile preview card. We'll create 5 dummy user profiles with realistic stats to demonstrate the feature.
+### Concept
+A dedicated page called **EduFund** where academically active students can publish funding proposals (e.g., "I need a laptop for JEE prep") and other users can support them with donations. Think of it as a mini-GoFundMe built into EduBlast, but only for verified, academically committed students.
 
-### Dummy Profiles (5 users)
+### How It Works
 
-1. **Sankar L** (SA) -- Physics enthusiast, 147 RDM, Scholar rank
-2. **Priya M** (PM) -- Biology topper, 320 RDM, Expert rank
-3. **Arjun K** (AK) -- Math wizard, 85 RDM, Novice rank
-4. **Deepa R** (DR) -- Chemistry focused, 210 RDM, Scholar rank
-5. **Ravi T** (RT) -- All-rounder, 530 RDM, Master rank
+**For viewers (everyone):**
+- Browse all active funding proposals
+- See each student's verified academic profile (linked to their public profile)
+- Donate any amount to a proposal
+- See progress bars showing how much has been raised vs. the goal
 
-### Profile Popup Content (the "LinkedIn-meets-Twitter" card)
+**For publishers (eligibility-gated):**
+- Only students who meet academic criteria can create proposals
+- Criteria (to be enforced later, shown as UI badges now):
+  - Minimum 3 accepted answers in Doubts
+  - Completed at least 1 mock test
+  - Active revision streak (3+ days)
+  - Scholar rank or above (100+ RDM)
+- For testing phase: no restrictions enforced, but eligibility badges are displayed
 
-**Header section:**
-- Avatar circle with initials + colored background
-- Display name + rank badge (Novice / Scholar / Expert / Master)
-- RDM balance with coin icon
-- Member since date
-- Bio/tagline (one-liner)
+### Page Layout
 
-**Stats grid (4 cards):**
-- Total Questions Asked
-- Total Answers Given
-- Accepted Answers (green checkmark count)
-- Strike Rate (accuracy %)
+**Header:** "EduFund" title with heart icon, description explaining the concept
 
-**Subject Breakdown (bar/pill chart):**
-- Physics: X questions answered
-- Chemistry: X questions answered
-- Math: X questions answered
-- Biology: X questions answered
+**Top bar:** "Create Proposal" button (with eligibility tooltip), filter/sort options
 
-**Reputation section:**
-- Total RDM earned from Doubts
-- Bounties won
-- Current rank + progress bar to next rank
-- Top contributor badges (if any, e.g. "Top 5 this week")
+**Proposal Cards (main feed):**
+- Student avatar + name (clickable, opens UserProfilePopup)
+- Proposal title and detailed description (the "blog" / story)
+- Category tag (e.g., "Learning Device", "Books & Materials", "Course Fee")
+- Funding goal amount and progress bar showing raised vs. goal
+- Number of supporters
+- Eligibility badges showing why this student qualifies (verified academic achievements)
+- "Support" button with donation input
+- Date posted
 
-**Activity snapshot:**
-- Recent doubts asked (last 3)
-- Recent answers given (last 3)
-- Streak: "Active 5 days in a row"
+**Right sidebar:**
+- "How EduFund Works" explainer card
+- "Top Supported" proposals
+- Eligibility criteria checklist card
 
-**Footer:**
-- "View Full Profile" button
+### Dummy Proposals (5, using existing dummy profiles)
 
-### Technical Approach
+1. **Sankar L** -- "Need a laptop for JEE Advanced preparation" -- Goal: Rs 25,000 -- Raised: Rs 12,500
+2. **Priya M** -- "Biology reference books for NEET" -- Goal: Rs 5,000 -- Raised: Rs 4,200
+3. **Arjun K** -- "Graphic calculator for competitive math" -- Goal: Rs 8,000 -- Raised: Rs 1,500
+4. **Deepa R** -- "Chemistry lab equipment for home practice" -- Goal: Rs 12,000 -- Raised: Rs 6,800
+5. **Ravi T** -- "Online coaching subscription renewal" -- Goal: Rs 15,000 -- Raised: Rs 14,200
 
-**1. New component: `src/components/UserProfilePopup.tsx`**
-- Uses Radix `HoverCard` (hover to preview) or `Popover` (click to open) -- will use **HoverCard** for the quick preview feel
-- Receives a `userId` prop, looks up from dummy data
-- Rich card layout with all sections above
-- Smooth animation on open/close
-
-**2. New data file: `src/data/dummyProfiles.ts`**
-- Contains 5 detailed dummy profiles with all stats
-- Each profile has: id, name, initials, avatarColor, bio, rdm, rank, memberSince, subjectStats (physics/chem/math/bio counts), questionsAsked, answersGiven, acceptedAnswers, strikeRate, bountiesWon, rdmFromDoubts, recentDoubts, recentAnswers, streakDays, badges
-
-**3. Update `src/pages/Doubts.tsx`**
-- Add `authorId` and `authorName`/`authorInitials` fields to each sampleDoubt
-- Replace the plain date/subject line with a clickable avatar + name that triggers the profile popup
-- Add author info row to each doubt card (avatar circle + name, like the screenshot shows "SA San L.")
-- Wire up `UserProfilePopup` wrapping each author avatar
-
-**4. Interaction model:**
-- Hover over avatar: shows the full profile card
-- Click on avatar: also opens it (for mobile)
-- Card appears as a floating panel next to the avatar
-- "View Full Profile" links to `/profile/:id` (future)
-
-### Changes Summary
+### Technical Plan
 
 | File | Action |
 |------|--------|
-| `src/data/dummyProfiles.ts` | Create -- 5 rich dummy profiles |
-| `src/components/UserProfilePopup.tsx` | Create -- HoverCard-based profile popup |
-| `src/pages/Doubts.tsx` | Update -- add author data to doubts, render clickable avatars with popup |
+| `src/pages/EduFund.tsx` | Create -- Full page with proposal cards, sidebar, dummy data |
+| `src/components/AppLayout.tsx` | Update -- Add "EduFund" to navbar with Heart icon |
+| `src/App.tsx` | Update -- Add `/edufund` route as protected route |
+
+**Details:**
+
+**1. `src/pages/EduFund.tsx`**
+- Uses `AppLayout` wrapper
+- 3-column layout matching Doubts page style (left sidebar, main feed, right sidebar)
+- Left sidebar: user's own eligibility status checklist, "My Proposals" section
+- Main feed: proposal cards with avatar (wrapped in `UserProfilePopup`), story text, progress bar, support button, category/eligibility badges
+- Right sidebar: "How It Works" card, "Top Supported" list, eligibility criteria explainer
+- Dummy data array with 5 proposals linked to existing `dummyProfiles`
+- Each proposal shows academic verification badges (e.g., "Scholar Rank", "15 Accepted Answers", "9-day Streak")
+- Progress bar using the existing `Progress` component
+- "Support" button opens a small inline input for donation amount
+
+**2. `src/components/AppLayout.tsx`**
+- Add `Heart` icon import from lucide-react
+- Add nav item: `{ path: '/edufund', icon: Heart, label: 'EduFund', emoji: '💛' }` after Doubts
+
+**3. `src/App.tsx`**
+- Import `EduFund` page
+- Add route: `<Route path="/edufund" element={<ProtectedRoute><EduFund /></ProtectedRoute>} />`
