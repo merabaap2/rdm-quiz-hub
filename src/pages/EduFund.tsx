@@ -121,6 +121,10 @@ const EduFund = () => {
                   <Label htmlFor="story">Your Story</Label>
                   <Textarea id="story" placeholder="Tell the community why you need this, what it means to you, and how it will help your studies..." value={newStory} onChange={(e) => setNewStory(e.target.value)} className="rounded-xl min-h-[140px]" />
                 </div>
+                {/* Disclaimer */}
+                <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive leading-relaxed">
+                  <span className="font-bold">⚠️ Important:</span> Your story must be 100% original and written in your own words. AI-generated, copied, or plagiarised content will result in <span className="font-bold">immediate proposal removal, all received funds being blocked, and permanent account suspension.</span> Write genuinely — reviewers verify every submission.
+                </div>
                 <Button className="w-full rounded-xl font-bold gap-2" onClick={handleCreateSubmit}>
                   <Heart className="w-4 h-4" /> Publish Proposal
                 </Button>
