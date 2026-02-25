@@ -1,5 +1,6 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Progress } from '@/components/ui/progress';
+import { useNavigate } from 'react-router-dom';
 import { getProfileById, rankColors, type DummyProfile } from '@/data/dummyProfiles';
 import { Award, CheckCircle2, Flame, HelpCircle, MessageSquare, Star, Trophy, Zap } from 'lucide-react';
 
@@ -10,8 +11,7 @@ const subjectBarColors: Record<string, string> = {
   biology: 'bg-accent',
 };
 
-const ProfileContent = ({ profile }: { profile: DummyProfile }) => {
-  const totalAnswered = profile.subjectStats.physics + profile.subjectStats.chemistry + profile.subjectStats.math + profile.subjectStats.biology;
+const ProfileContent = ({ profile, onViewFull }: { profile: DummyProfile; onViewFull: () => void }) => {
   const maxSubject = Math.max(...Object.values(profile.subjectStats));
   const rankProgress = Math.min(100, Math.round((profile.rdm / profile.nextRankRdm) * 100));
 
@@ -121,7 +121,7 @@ const ProfileContent = ({ profile }: { profile: DummyProfile }) => {
       </div>
 
       {/* Footer */}
-      <button className="w-full text-xs font-bold text-secondary hover:underline text-center py-1">
+      <button onClick={onViewFull} className="w-full text-xs font-bold text-secondary hover:underline text-center py-1">
         View Full Profile →
       </button>
     </div>
@@ -135,13 +135,14 @@ interface UserProfilePopupProps {
 
 const UserProfilePopup = ({ userId, children }: UserProfilePopupProps) => {
   const profile = getProfileById(userId);
+  const navigate = useNavigate();
   if (!profile) return <>{children}</>;
 
   return (
     <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent className="w-auto p-4" side="top" align="start">
-        <ProfileContent profile={profile} />
+        <ProfileContent profile={profile} onViewFull={() => navigate(`/user/${profile.id}`)} />
       </HoverCardContent>
     </HoverCard>
   );
