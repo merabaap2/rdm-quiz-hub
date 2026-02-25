@@ -1,80 +1,69 @@
 
-## Student Support Fund Page ("EduFund")
 
-### Concept
-A dedicated page called **EduFund** where academically active students can publish funding proposals (e.g., "I need a laptop for JEE prep") and other users can support them with donations. Think of it as a mini-GoFundMe built into EduBlast, but only for verified, academically committed students.
+## EduFund Enhancements: Proposal Detail Page + Create Proposal Form
 
-### How It Works
+### 1. Proposal Detail Page (Reddit-style full view)
 
-**For viewers (everyone):**
-- Browse all active funding proposals
-- See each student's verified academic profile (linked to their public profile)
-- Donate any amount to a proposal
-- See progress bars showing how much has been raised vs. the goal
+Right now, the story text is shown fully on the feed card. We'll make two changes:
 
-**For publishers (eligibility-gated):**
-- Only students who meet academic criteria can create proposals
-- Criteria (to be enforced later, shown as UI badges now):
-  - Minimum 3 accepted answers in Doubts
-  - Completed at least 1 mock test
-  - Active revision streak (3+ days)
-  - Scholar rank or above (100+ RDM)
-- For testing phase: no restrictions enforced, but eligibility badges are displayed
+**On the feed card:** Truncate the story to ~2 lines with a "Read more" link. When clicked, it navigates to a dedicated detail page `/edufund/:id`.
 
-### Page Layout
+**New detail page (`src/pages/EduFundProposal.tsx`):**
+- Full-screen layout with AppLayout wrapper
+- Back button ("Back to EduFund") at the top
+- Student profile header (avatar, name, date, category badge)
+- Full title displayed prominently
+- Complete story text with proper paragraph formatting
+- Eligibility badges section
+- Progress bar with raised/goal amounts and supporter count
+- Support/Donate button (same inline input behavior)
+- Sidebar with student's public profile summary card
 
-**Header:** "EduFund" title with heart icon, description explaining the concept
+Each proposal's dummy data will also get a `fullStory` field -- a longer, multi-paragraph version of their story so there's actually more content to read on the detail page.
 
-**Top bar:** "Create Proposal" button (with eligibility tooltip), filter/sort options
+### 2. Create Proposal Form
 
-**Proposal Cards (main feed):**
-- Student avatar + name (clickable, opens UserProfilePopup)
-- Proposal title and detailed description (the "blog" / story)
-- Category tag (e.g., "Learning Device", "Books & Materials", "Course Fee")
-- Funding goal amount and progress bar showing raised vs. goal
-- Number of supporters
-- Eligibility badges showing why this student qualifies (verified academic achievements)
-- "Support" button with donation input
-- Date posted
+The "Create Proposal" button will open a dialog/modal with a form containing:
+- **Title** input (text)
+- **Category** dropdown (Learning Device, Books & Materials, Lab Equipment, Course Fee)
+- **Goal Amount** input (number, in rupees)
+- **Your Story** textarea (multi-paragraph description)
+- Submit button
 
-**Right sidebar:**
-- "How EduFund Works" explainer card
-- "Top Supported" proposals
-- Eligibility criteria checklist card
+Since this is testing phase, no eligibility restrictions are enforced -- the form is available to everyone. A toast confirmation will appear on submit.
 
-### Dummy Proposals (5, using existing dummy profiles)
-
-1. **Sankar L** -- "Need a laptop for JEE Advanced preparation" -- Goal: Rs 25,000 -- Raised: Rs 12,500
-2. **Priya M** -- "Biology reference books for NEET" -- Goal: Rs 5,000 -- Raised: Rs 4,200
-3. **Arjun K** -- "Graphic calculator for competitive math" -- Goal: Rs 8,000 -- Raised: Rs 1,500
-4. **Deepa R** -- "Chemistry lab equipment for home practice" -- Goal: Rs 12,000 -- Raised: Rs 6,800
-5. **Ravi T** -- "Online coaching subscription renewal" -- Goal: Rs 15,000 -- Raised: Rs 14,200
-
-### Technical Plan
+### Technical Changes
 
 | File | Action |
 |------|--------|
-| `src/pages/EduFund.tsx` | Create -- Full page with proposal cards, sidebar, dummy data |
-| `src/components/AppLayout.tsx` | Update -- Add "EduFund" to navbar with Heart icon |
-| `src/App.tsx` | Update -- Add `/edufund` route as protected route |
+| `src/pages/EduFundProposal.tsx` | **Create** -- Full detail page for a single proposal |
+| `src/pages/EduFund.tsx` | **Update** -- Truncate story text to 2 lines with "Read more" link; add Create Proposal dialog with form; add longer `fullStory` to each proposal; make title clickable |
+| `src/App.tsx` | **Update** -- Add route `/edufund/:id` pointing to EduFundProposal |
 
-**Details:**
+### Detail Page Layout
 
-**1. `src/pages/EduFund.tsx`**
-- Uses `AppLayout` wrapper
-- 3-column layout matching Doubts page style (left sidebar, main feed, right sidebar)
-- Left sidebar: user's own eligibility status checklist, "My Proposals" section
-- Main feed: proposal cards with avatar (wrapped in `UserProfilePopup`), story text, progress bar, support button, category/eligibility badges
-- Right sidebar: "How It Works" card, "Top Supported" list, eligibility criteria explainer
-- Dummy data array with 5 proposals linked to existing `dummyProfiles`
-- Each proposal shows academic verification badges (e.g., "Scholar Rank", "15 Accepted Answers", "9-day Streak")
-- Progress bar using the existing `Progress` component
-- "Support" button opens a small inline input for donation amount
+```text
++------------------------------------------+
+| <- Back to EduFund                       |
++------------------------------------------+
+| [Avatar] Name    Date    [Category Badge]|
+|                                          |
+| ## Proposal Title (large)                |
+|                                          |
+| Full story paragraph 1...               |
+| Full story paragraph 2...               |
+| Full story paragraph 3...               |
+|                                          |
+| [Badge] [Badge] [Badge]                 |
+|                                          |
+| Rs 12,500 ========== of Rs 25,000       |
+| 18 supporters         50% funded        |
+|                                          |
+| [ Support this student ]                |
++------------------------------------------+
+```
 
-**2. `src/components/AppLayout.tsx`**
-- Add `Heart` icon import from lucide-react
-- Add nav item: `{ path: '/edufund', icon: Heart, label: 'EduFund', emoji: '💛' }` after Doubts
+### Create Proposal Dialog
 
-**3. `src/App.tsx`**
-- Import `EduFund` page
-- Add route: `<Route path="/edufund" element={<ProtectedRoute><EduFund /></ProtectedRoute>} />`
+A modal form with title, category selector, goal amount, and a large textarea for the story. On submit, shows a success toast (no persistence yet since we're using dummy data).
+
