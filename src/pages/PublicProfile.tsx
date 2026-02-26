@@ -2,13 +2,27 @@ import AppLayout from '@/components/AppLayout';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProfileById, rankColors, type DummyProfile } from '@/data/dummyProfiles';
 import { Progress } from '@/components/ui/progress';
-import { Award, ArrowLeft, CheckCircle2, Flame, HelpCircle, MessageSquare, Star, Trophy, Zap, Calendar, Target, BookOpen } from 'lucide-react';
+import { Award, ArrowLeft, CheckCircle2, Flame, GraduationCap, HelpCircle, Medal, MessageSquare, ShieldCheck, ShieldAlert, ShieldQuestion, Star, Trophy, Zap, Calendar, Target, BookOpen } from 'lucide-react';
 
 const subjectBarColors: Record<string, string> = {
   physics: 'bg-secondary',
   chemistry: 'bg-primary',
   math: 'bg-edu-orange',
   biology: 'bg-accent',
+};
+
+const levelColors: Record<string, string> = {
+  School: 'bg-muted text-muted-foreground',
+  District: 'bg-secondary/15 text-secondary',
+  State: 'bg-accent/15 text-accent',
+  National: 'bg-primary/15 text-primary',
+  International: 'bg-edu-orange/15 text-edu-orange',
+};
+
+const verificationConfig = {
+  verified: { label: 'Verified', icon: ShieldCheck, className: 'text-accent' },
+  pending: { label: 'Pending', icon: ShieldQuestion, className: 'text-edu-orange' },
+  unverified: { label: 'Unverified', icon: ShieldAlert, className: 'text-muted-foreground' },
 };
 
 const PublicProfile = () => {
@@ -85,6 +99,95 @@ const PublicProfile = () => {
               <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
             </div>
           ))}
+        </div>
+
+        {/* Academic Record */}
+        {profile.academics.length > 0 && (
+          <div className="edu-card p-5">
+            <h2 className="font-bold text-sm text-foreground flex items-center gap-1.5 mb-4">
+              <GraduationCap className="w-4 h-4 text-secondary" /> Academic Record
+            </h2>
+            <div className="space-y-2">
+              {profile.academics.map((rec, i) => {
+                const v = verificationConfig[rec.verified];
+                return (
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-semibold text-foreground">{rec.exam}</span>
+                      <span className="text-xs text-muted-foreground">{rec.board}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-bold text-foreground">{rec.score}</span>
+                      <span className={`flex items-center gap-1 text-xs font-medium ${v.className}`}>
+                        <v.icon className="w-3.5 h-3.5" /> {v.label}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Achievements & Competitions */}
+        {profile.achievements.length > 0 && (
+          <div className="edu-card p-5">
+            <h2 className="font-bold text-sm text-foreground flex items-center gap-1.5 mb-4">
+              <Medal className="w-4 h-4 text-edu-orange" /> Achievements & Competitions
+            </h2>
+            <div className="space-y-2">
+              {profile.achievements.map((ach, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-foreground">{ach.name}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${levelColors[ach.level]}`}>{ach.level}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground">{ach.year}</span>
+                    <span className="text-xs font-semibold text-foreground">{ach.result}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* RDM Score Breakdown */}
+        <div className="edu-card p-5">
+          <h2 className="font-bold text-sm text-foreground flex items-center gap-1.5 mb-4">
+            <Zap className="w-4 h-4 text-edu-orange" /> RDM Score Breakdown
+          </h2>
+          {(() => {
+            const b = profile.rdmBreakdown;
+            const items = [
+              { label: 'Answers Given', value: b.answersGiven, color: 'bg-primary' },
+              { label: 'Accepted Bonus', value: b.acceptedBonus, color: 'bg-accent' },
+              { label: 'Mock Tests', value: b.mockTests, color: 'bg-secondary' },
+              { label: 'Streak Bonus', value: b.streakBonus, color: 'bg-edu-orange' },
+              { label: 'Bounties Won', value: b.bountiesWon, color: 'bg-edu-yellow' },
+              { label: 'Doubts Asked', value: b.doubtsAsked, color: 'bg-muted-foreground' },
+            ];
+            const total = items.reduce((s, i) => s + i.value, 0);
+            const maxVal = Math.max(...items.map(i => i.value));
+            return (
+              <>
+                <div className="space-y-2.5">
+                  {items.map((item) => (
+                    <div key={item.label} className="flex items-center gap-3">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0">{item.label}</span>
+                      <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${item.color}`} style={{ width: `${maxVal > 0 ? (item.value / maxVal) * 100 : 0}%` }} />
+                      </div>
+                      <span className="text-xs font-bold text-foreground w-12 text-right">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end mt-4 pt-3 border-t border-border">
+                  <span className="text-sm font-bold text-edu-orange">Total: {total} RDM 🪙</span>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Subject breakdown */}
