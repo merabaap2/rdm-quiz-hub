@@ -1,69 +1,82 @@
 
 
-## EduFund Enhancements: Proposal Detail Page + Create Proposal Form
+## Enhance Public Student Profile with Academics, Achievements & RDM Breakdown
 
-### 1. Proposal Detail Page (Reddit-style full view)
+### 1. Academic Marks Section
+Add a new "Academic Record" card showing exam marks with verification status:
+- Class level (e.g., "Class 10", "Class 12") with percentage/CGPA
+- Verification badge: a colored indicator showing "Verified", "Pending", or "Unverified"
+- Board name (e.g., CBSE, ICSE, State Board)
 
-Right now, the story text is shown fully on the feed card. We'll make two changes:
+### 2. Competitions & Achievements Section
+Add an "Achievements & Competitions" card listing olympiads, prizes, and competitions:
+- Each entry shows: competition name, level (School/District/State/National/International), year, and result (e.g., "Gold Medal", "Rank 12")
+- Level shown as a colored badge to quickly distinguish scale (e.g., green for State, blue for National, purple for International)
 
-**On the feed card:** Truncate the story to ~2 lines with a "Read more" link. When clicked, it navigates to a dedicated detail page `/edufund/:id`.
-
-**New detail page (`src/pages/EduFundProposal.tsx`):**
-- Full-screen layout with AppLayout wrapper
-- Back button ("Back to EduFund") at the top
-- Student profile header (avatar, name, date, category badge)
-- Full title displayed prominently
-- Complete story text with proper paragraph formatting
-- Eligibility badges section
-- Progress bar with raised/goal amounts and supporter count
-- Support/Donate button (same inline input behavior)
-- Sidebar with student's public profile summary card
-
-Each proposal's dummy data will also get a `fullStory` field -- a longer, multi-paragraph version of their story so there's actually more content to read on the detail page.
-
-### 2. Create Proposal Form
-
-The "Create Proposal" button will open a dialog/modal with a form containing:
-- **Title** input (text)
-- **Category** dropdown (Learning Device, Books & Materials, Lab Equipment, Course Fee)
-- **Goal Amount** input (number, in rupees)
-- **Your Story** textarea (multi-paragraph description)
-- Submit button
-
-Since this is testing phase, no eligibility restrictions are enforced -- the form is available to everyone. A toast confirmation will appear on submit.
+### 3. RDM Score Breakdown Section
+Replace or enhance the existing Reputation card with a detailed "RDM Score Breakdown" showing how the total RDM is composed:
+- Answers given (points earned from helping others)
+- Accepted answers bonus
+- Mock test performance
+- Streak/consistency bonus
+- Bounties won
+- Each component shown as a horizontal bar or row with its contribution to total RDM
+- A visual summary (e.g., small donut or stacked bar) showing proportions
 
 ### Technical Changes
 
 | File | Action |
 |------|--------|
-| `src/pages/EduFundProposal.tsx` | **Create** -- Full detail page for a single proposal |
-| `src/pages/EduFund.tsx` | **Update** -- Truncate story text to 2 lines with "Read more" link; add Create Proposal dialog with form; add longer `fullStory` to each proposal; make title clickable |
-| `src/App.tsx` | **Update** -- Add route `/edufund/:id` pointing to EduFundProposal |
+| `src/data/dummyProfiles.ts` | Add new fields to `DummyProfile` interface: `academics` (array of marks records), `achievements` (array of competition entries), `rdmBreakdown` (object with component scores). Populate dummy data for all 5 profiles. |
+| `src/pages/PublicProfile.tsx` | Add three new card sections: Academic Record, Achievements, and RDM Breakdown, placed between the stats grid and subject breakdown. |
 
-### Detail Page Layout
+### New Data Fields
+
+```text
+academics: [
+  { exam: "Class 10", board: "CBSE", score: "92%", verified: true },
+  { exam: "Class 12", board: "CBSE", score: "89%", verified: false }
+]
+
+achievements: [
+  { name: "Science Olympiad", level: "National", year: 2025, result: "Gold Medal" },
+  { name: "Math Challenge", level: "State", year: 2024, result: "Rank 3" }
+]
+
+rdmBreakdown: {
+  answersGiven: 50,
+  acceptedBonus: 30,
+  mockTests: 20,
+  streakBonus: 15,
+  bountiesWon: 25,
+  doubtsAsked: 7
+}
+```
+
+### Layout (new sections inserted after stats grid)
 
 ```text
 +------------------------------------------+
-| <- Back to EduFund                       |
+| Academic Record              [Grad cap]  |
+| Class 10  CBSE   92%     [Verified]      |
+| Class 12  CBSE   89%     [Pending]       |
 +------------------------------------------+
-| [Avatar] Name    Date    [Category Badge]|
-|                                          |
-| ## Proposal Title (large)                |
-|                                          |
-| Full story paragraph 1...               |
-| Full story paragraph 2...               |
-| Full story paragraph 3...               |
-|                                          |
-| [Badge] [Badge] [Badge]                 |
-|                                          |
-| Rs 12,500 ========== of Rs 25,000       |
-| 18 supporters         50% funded        |
-|                                          |
-| [ Support this student ]                |
+
++------------------------------------------+
+| Achievements & Competitions    [Medal]   |
+| Science Olympiad  [National] 2025  Gold  |
+| Math Challenge    [State]    2024  Rank 3|
+| Quiz Bowl         [District] 2024  Winner|
++------------------------------------------+
+
++------------------------------------------+
+| RDM Score Breakdown            [Zap]     |
+| Answers Given      =========    50 RDM   |
+| Accepted Bonus     ======       30 RDM   |
+| Mock Tests         ====         20 RDM   |
+| Streak Bonus       ===          15 RDM   |
+| Bounties Won       =====        25 RDM   |
+| Doubts Asked       ==            7 RDM   |
+|                          Total: 147 RDM  |
 +------------------------------------------+
 ```
-
-### Create Proposal Dialog
-
-A modal form with title, category selector, goal amount, and a large textarea for the story. On submit, shows a success toast (no persistence yet since we're using dummy data).
-
